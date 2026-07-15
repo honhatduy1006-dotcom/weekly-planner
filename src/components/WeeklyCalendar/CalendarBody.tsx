@@ -1,14 +1,17 @@
 import TimeColumn from "./TimeColumn";
 import DayColumn from "./DayColumn";
+import type { Task } from "../../types/task";
 
 type CalendarBodyProps = {
     days: string[];
     hours: string[];
+    tasks: Task[];
 };
 
 export default function CalendarBody({
     days,
     hours,
+    tasks,
 }: CalendarBodyProps) {
     return (
         <div 
@@ -24,6 +27,7 @@ export default function CalendarBody({
                     key={day}
                     day={day}
                     hours={hours}
+                    tasks={tasks}
                 />
             ))}
         </div>

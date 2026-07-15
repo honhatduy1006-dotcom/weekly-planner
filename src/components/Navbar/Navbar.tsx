@@ -1,4 +1,10 @@
-export default function Navbar() {
+type NavbarProps = {
+    onAddTask: () => void;
+};
+
+export default function Navbar({
+    onAddTask,
+}: NavbarProps) {
     return (
         <header className="bg-white border-b shadow-sm">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
@@ -13,16 +19,8 @@ export default function Navbar() {
                 </div>
 
                 <button
-                    className="
-                        rounded-lg
-                        bg-blue-600
-                        px-5
-                        py-2
-                        font-medium
-                        text-white
-                        transition
-                        hover:bg-blue-700
-                    "
+                    onClick={onAddTask}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
                 >
                     + Add Task
                 </button>
