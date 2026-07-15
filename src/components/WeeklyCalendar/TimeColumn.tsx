@@ -8,7 +8,13 @@ export default function TimeColumn({ hours }: TimeColumnProps) {
             {hours.map((hour) => (
                 <div
                     key={hour}
-                    className="h-16 border border-gray-300 flex items-center justify-center text-sm bg-gray-50"
+                    className="
+                        flex items-center justify-center
+                        h-20
+                        border border-gray-200
+                        bg-gray-50
+                        text-sm font-medium text-gray-500
+                    "
                 >
                     {hour}
                 </div>

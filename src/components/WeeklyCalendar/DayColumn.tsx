@@ -11,7 +11,15 @@ export default function DayColumn({
             {hours.map((hour) => (
                 <div
                     key={hour}
-                    className="h-16 border border-gray-300 hover:bg-blue-50 cursor-pointer transition-colors"
+                    className="
+                        h-20
+                        cursor-pointer
+                        border
+                        border-gray-200
+                        transition
+                        duration-150
+                        hover:bg-blue-50   
+                    "
                 ></div>
             ))}
         </div>

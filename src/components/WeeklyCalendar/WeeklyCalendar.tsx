@@ -4,7 +4,7 @@ import CalendarBody from "./CalendarBody";
 
 export default function WeeklyCalendar() {
     return (
-        <div className="w-full p-6">
+        <div className="mx-auto mt-8 w-[95%] max-w-7xl rounded-xl bg-white shadow-md overflow-hidden">
             <CalendarHeader days={DAYS} />
 
             <CalendarBody

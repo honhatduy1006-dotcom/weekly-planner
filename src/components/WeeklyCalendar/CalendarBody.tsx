@@ -11,7 +11,12 @@ export default function CalendarBody({
     hours,
 }: CalendarBodyProps) {
     return (
-        <div className="grid grid-cols-8">
+        <div 
+            className="
+                grid
+                grid-cols-[90px_repeat(7,minmax(0,1fr))]
+            "
+        >
             <TimeColumn hours={hours} />
 
             {days.map((day) => (
