@@ -6,12 +6,17 @@ type CalendarBodyProps = {
     days: string[];
     hours: string[];
     tasks: Task[];
+    onEdit: (task: Task) => void;
+
+    onDelete: (task: Task) => void;
 };
 
 export default function CalendarBody({
     days,
     hours,
     tasks,
+    onEdit,
+    onDelete,
 }: CalendarBodyProps) {
     return (
         <div 
@@ -28,6 +33,8 @@ export default function CalendarBody({
                     day={day}
                     hours={hours}
                     tasks={tasks}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
                 />
             ))}
         </div>

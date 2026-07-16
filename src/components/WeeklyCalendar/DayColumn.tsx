@@ -1,16 +1,22 @@
 import type { Task } from "../../types/task";
 import TaskCard from "../TaskCard/TaskCard";
+import { getTaskTop } from "../../utils/time";
 
 type DayColumnProps = {
     day: string;
     hours: string[];
     tasks: Task[];
+    onEdit: (task: Task) => void;
+
+    onDelete: (task: Task) => void;
 };
 
 export default function DayColumn({
     day,
     hours,
     tasks,
+    onEdit,
+    onDelete,
 }: DayColumnProps) {
 
     const dayTasks = tasks.filter(
@@ -44,23 +50,14 @@ export default function DayColumn({
 
                 {dayTasks.map(task => {
 
-                    const start =
-                        Number(task.startTime.split(":")[0]);
-
-                    const end =
-                        Number(task.endTime.split(":")[0]);
-
-                    const duration = end - start;
-
-                    const top = (start - 6) * 80;
-
                     return (
 
                         <TaskCard
                             key={task.id}
                             task={task}
-                            duration={duration}
-                            top={top}
+                            top={getTaskTop(task.startTime)}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
                         />
 
                     );

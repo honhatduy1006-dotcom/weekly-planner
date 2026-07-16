@@ -1,21 +1,27 @@
 import type { Task } from "../../types/task";
+import { getTaskHeight } from "../../utils/time";
 
 type TaskCardProps = {
     task: Task;
-    duration: number;
     top:number;
+    onEdit(task: Task): void;
+    onDelete(task: Task): void;
 };
 
 export default function TaskCard({ 
     task,
-    duration,
     top,
+    onEdit,
+    onDelete,
  }: TaskCardProps) {
+
     return (
         <div
+            onClick={() => onEdit(task)}
+
             style={{
                 top,
-                height: `${duration * 80}px`,
+                height: `${getTaskHeight(task.startTime, task.endTime)}px`,
             }}
             className={`
                 absolute
@@ -41,18 +47,77 @@ export default function TaskCard({
                 z-20
             `}
         >
-            <h3 className="font-semibold text-lg">
+            <h3 className="
+                    font-semibold
+                    text-sm
+                    leading-5
+                    truncate
+            ">
                 {task.title}
             </h3>
 
             {task.description && (
-                <p className="mt-1 text-sm opacity-90">
+                <p className="
+                    mt-1
+                    text-xs
+                    leading-4
+                    opacity-90
+                    line-clamp-2
+                ">
                     {task.description}
                 </p>
             )}
 
-            <div className="mt-2 text-xs font-medium opacity-90">
+            <div className="
+                    mt-2
+                    text-[11px]
+                    leading-4
+                    font-medium
+                    opacity-80
+            ">
                 {task.startTime} - {task.endTime}
+            </div>
+
+            <span
+                className={`
+                    mt-2
+                    inline-block
+                    rounded-full
+                    px-2
+                    py-1
+                    text-[10px]
+                    font-semibold
+                    ${
+                        task.completed
+                            ? "bg-green-600 text-white"
+                            : "bg-yellow-500 text-white"
+                    }
+                `}
+            >
+                {task.completed ? "Completed" : "In Progress"}
+            </span>
+
+            <div className="absolute top-2 right-2">
+
+                <button
+
+                    onClick={(e) => {
+
+                        e.stopPropagation();
+
+                        onDelete(task);
+
+                    }}
+
+                    className="
+                        rounded
+                        p-1
+                        hover:bg-white/20
+                    "
+                >
+                    🗑
+                </button>
+
             </div>
         </div>
     );
