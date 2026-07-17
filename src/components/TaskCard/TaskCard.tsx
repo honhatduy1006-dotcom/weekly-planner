@@ -1,12 +1,17 @@
 import type { Task } from "../../types/task";
 import { getTaskHeight } from "../../utils/time";
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
+import { snapToHour } from "../../utils/time";
+import { topToTime } from "../../utils/time";
+import { getDurationInMinutes } from "../../utils/time";
+import { minutesToTime } from "../../utils/time";
+import { timeToMinutes } from "../../utils/time";
 type TaskCardProps = {
     task: Task;
     top:number;
     onEdit(task: Task): void;
     onDelete(task: Task): void;
+    onMove: (task: Task) => void;
 };
 
 export default function TaskCard({ 
@@ -14,6 +19,7 @@ export default function TaskCard({
     top,
     onEdit,
     onDelete,
+    onMove,
  }: TaskCardProps) {
 
     const [dragging, setDragging] = useState(false);
@@ -24,112 +30,109 @@ export default function TaskCard({
 
     const [startTop, setStartTop] = useState(top);
 
+    const dragTopRef = useRef(top);
+    const didDragRef = useRef(false);
+
     useEffect(() => {
         setDragTop(top);
+        dragTopRef.current = top;
     }, [top]);
 
-    const handleMouseDown = (
-        e: React.MouseEvent<HTMLDivElement>
-    ) => {
-
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         setDragging(true);
-
         setStartY(e.clientY);
-
         setStartTop(dragTop);
-
+        didDragRef.current = false;
     };
 
     useEffect(() => {
-
         if (!dragging) return;
 
-        const handleMouseMove = (
-            e: MouseEvent
-        ) => {
+        const DRAG_THRESHOLD = 5;
 
+        const handleMouseMove = (e: MouseEvent) => {
             const delta = e.clientY - startY;
 
-            setDragTop(startTop + delta);
+            if (Math.abs(delta) > DRAG_THRESHOLD) {
+                didDragRef.current = true;
+            }
 
+            const newTop = startTop + delta;
+            setDragTop(newTop);
+            dragTopRef.current = newTop;
         };
 
         const handleMouseUp = () => {
+            if (didDragRef.current) {
+                const snappedTop = snapToHour(dragTopRef.current);
+                setDragTop(snappedTop);
+                dragTopRef.current = snappedTop;
+
+                const newStart = topToTime(snappedTop);
+                const duration = getDurationInMinutes(task.startTime, task.endTime);
+                const newEnd = minutesToTime(timeToMinutes(newStart) + duration);
+
+                onMove({
+                    ...task,
+                    startTime: newStart,
+                    endTime: newEnd,
+                    updatedAt: new Date(),
+                });
+            } else {
+                setDragTop(startTop);
+                dragTopRef.current = startTop;
+            }
 
             setDragging(false);
-
         };
 
-        window.addEventListener(
-            "mousemove",
-            handleMouseMove
-        );
-
-        window.addEventListener(
-            "mouseup",
-            handleMouseUp
-        );
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
 
         return () => {
-
-            window.removeEventListener(
-                "mousemove",
-                handleMouseMove
-            );
-
-            window.removeEventListener(
-                "mouseup",
-                handleMouseUp
-            );
-
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
         };
+    }, [dragging, startY, startTop]);
 
-    }, [
-        dragging,
-        startY,
-        startTop,
-    ]);
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (didDragRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        onEdit(task);
+    };
+
     return (
         <div
-            onClick={() => onEdit(task)}
+            onClick={handleClick}
             onMouseDown={handleMouseDown}
 
             style={{
                 top: dragTop,
                 height: `${getTaskHeight(task.startTime, task.endTime)}px`,
-                cursor: dragging
-                        ? "grabbing"
-                        : "grab",
-                transform: dragging
-                    ? "scale(1.02)"
-                    : "scale(1)",
-
-                opacity: dragging
-                    ? 0.9
-                    : 1,
+                cursor: dragging ? "grabbing" : "grab",
+                transform: dragging ? "scale(1.02)" : "scale(1)",
+                opacity: dragging ? 0.9 : 1,
                 userSelect: dragging ? "none" : "auto",
             }}
             className={`
                 absolute
                 left-1
                 right-1
-
                 ${task.color}
-
                 rounded-lg
                 shadow-md
                 hover:shadow-xl
                 transition
                 text-white
-
                 flex
                 flex-col
                 justify-center
                 items-center
-
                 px-3
                 text-center
-
                 z-20
             `}
         >

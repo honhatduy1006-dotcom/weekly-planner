@@ -8,12 +8,15 @@ type WeeklyCalendarProps = {
     tasks: Task[];
     onEdit(task: Task): void;
     onDelete(task: Task): void;
+    onMove: (task: Task) => void;
 };
 
 export default function WeeklyCalendar({
     tasks,
     onEdit,
     onDelete,
+    onMove,
+    
 }: WeeklyCalendarProps) {
     return (
         <div className="mx-auto mt-8 w-[95%] max-w-7xl rounded-xl bg-white shadow-md overflow-hidden">
@@ -25,6 +28,8 @@ export default function WeeklyCalendar({
                 tasks={tasks}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onMove={onMove}
+
             />
         </div>
     );

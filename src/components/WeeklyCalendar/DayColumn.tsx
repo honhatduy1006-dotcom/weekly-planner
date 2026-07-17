@@ -7,7 +7,7 @@ type DayColumnProps = {
     hours: string[];
     tasks: Task[];
     onEdit: (task: Task) => void;
-
+    onMove: (task: Task) => void;
     onDelete: (task: Task) => void;
 };
 
@@ -17,6 +17,7 @@ export default function DayColumn({
     tasks,
     onEdit,
     onDelete,
+    onMove,
 }: DayColumnProps) {
 
     const dayTasks = tasks.filter(
@@ -58,6 +59,7 @@ export default function DayColumn({
                             top={getTaskTop(task.startTime)}
                             onEdit={onEdit}
                             onDelete={onDelete}
+                            onMove={onMove}
                         />
 
                     );

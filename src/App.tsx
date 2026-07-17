@@ -149,6 +149,7 @@ function App() {
                 tasks={tasks}
                 onEdit={handleEditTask}
                 onDelete={handleRequestDelete}
+                onMove={handleSaveTask}
             />
 
             <AddTaskModal

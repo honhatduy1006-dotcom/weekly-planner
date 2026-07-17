@@ -43,3 +43,18 @@ export function isValidTimeRange(
     return timeToMinutes(end) > timeToMinutes(start);
 }
 
+export function snapToHour(top: number): number {
+
+    return Math.round(top / HOUR_HEIGHT) * HOUR_HEIGHT;
+
+}
+
+export function topToTime(top: number): string {
+
+    const totalMinutes =
+        START_HOUR * 60 +
+        Math.round(top / HOUR_HEIGHT) * 60;
+
+    return minutesToTime(totalMinutes);
+
+}
