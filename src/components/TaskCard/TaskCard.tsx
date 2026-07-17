@@ -1,5 +1,6 @@
 import type { Task } from "../../types/task";
 import { getTaskHeight } from "../../utils/time";
+import { useEffect, useState } from "react";
 
 type TaskCardProps = {
     task: Task;
@@ -15,13 +16,98 @@ export default function TaskCard({
     onDelete,
  }: TaskCardProps) {
 
+    const [dragging, setDragging] = useState(false);
+
+    const [dragTop, setDragTop] = useState(top);
+
+    const [startY, setStartY] = useState(0);
+
+    const [startTop, setStartTop] = useState(top);
+
+    useEffect(() => {
+        setDragTop(top);
+    }, [top]);
+
+    const handleMouseDown = (
+        e: React.MouseEvent<HTMLDivElement>
+    ) => {
+
+        setDragging(true);
+
+        setStartY(e.clientY);
+
+        setStartTop(dragTop);
+
+    };
+
+    useEffect(() => {
+
+        if (!dragging) return;
+
+        const handleMouseMove = (
+            e: MouseEvent
+        ) => {
+
+            const delta = e.clientY - startY;
+
+            setDragTop(startTop + delta);
+
+        };
+
+        const handleMouseUp = () => {
+
+            setDragging(false);
+
+        };
+
+        window.addEventListener(
+            "mousemove",
+            handleMouseMove
+        );
+
+        window.addEventListener(
+            "mouseup",
+            handleMouseUp
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "mousemove",
+                handleMouseMove
+            );
+
+            window.removeEventListener(
+                "mouseup",
+                handleMouseUp
+            );
+
+        };
+
+    }, [
+        dragging,
+        startY,
+        startTop,
+    ]);
     return (
         <div
             onClick={() => onEdit(task)}
+            onMouseDown={handleMouseDown}
 
             style={{
-                top,
+                top: dragTop,
                 height: `${getTaskHeight(task.startTime, task.endTime)}px`,
+                cursor: dragging
+                        ? "grabbing"
+                        : "grab",
+                transform: dragging
+                    ? "scale(1.02)"
+                    : "scale(1)",
+
+                opacity: dragging
+                    ? 0.9
+                    : 1,
+                userSelect: dragging ? "none" : "auto",
             }}
             className={`
                 absolute
