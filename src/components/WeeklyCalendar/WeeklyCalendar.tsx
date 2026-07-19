@@ -1,7 +1,6 @@
 import { DAYS, HOURS } from "../../data/calendar";
 import CalendarHeader from "./CalendarHeader";
 import CalendarBody from "./CalendarBody";
-import { tasks } from "../../data/tasks";
 import type { Task } from "../../types/task";
 
 type WeeklyCalendarProps = {

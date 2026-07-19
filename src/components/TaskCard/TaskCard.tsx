@@ -6,12 +6,16 @@ import { topToTime } from "../../utils/time";
 import { getDurationInMinutes } from "../../utils/time";
 import { minutesToTime } from "../../utils/time";
 import { timeToMinutes } from "../../utils/time";
+
 type TaskCardProps = {
     task: Task;
     top:number;
     onEdit(task: Task): void;
     onDelete(task: Task): void;
     onMove: (task: Task) => void;
+    getDayFromClientX: (
+        clientX: number
+    ) => string | null;
 };
 
 export default function TaskCard({ 
@@ -20,6 +24,7 @@ export default function TaskCard({
     onEdit,
     onDelete,
     onMove,
+    getDayFromClientX,
  }: TaskCardProps) {
 
     const [dragging, setDragging] = useState(false);
@@ -30,7 +35,14 @@ export default function TaskCard({
 
     const [startTop, setStartTop] = useState(top);
 
+    const [dragLeft, setDragLeft] = useState(0);
+
+    const [startX, setStartX] = useState(0);
+
+    const [startLeft, setStartLeft] = useState(0);
+
     const dragTopRef = useRef(top);
+
     const didDragRef = useRef(false);
 
     useEffect(() => {
@@ -42,6 +54,8 @@ export default function TaskCard({
         setDragging(true);
         setStartY(e.clientY);
         setStartTop(dragTop);
+        setStartX(e.clientX);
+        setStartLeft(0);
         didDragRef.current = false;
     };
 
@@ -52,6 +66,7 @@ export default function TaskCard({
 
         const handleMouseMove = (e: MouseEvent) => {
             const delta = e.clientY - startY;
+            const deltaX = e.clientX - startX;
 
             if (Math.abs(delta) > DRAG_THRESHOLD) {
                 didDragRef.current = true;
@@ -59,10 +74,11 @@ export default function TaskCard({
 
             const newTop = startTop + delta;
             setDragTop(newTop);
+            setDragLeft(startLeft + deltaX);
             dragTopRef.current = newTop;
         };
 
-        const handleMouseUp = () => {
+        const handleMouseUp = (e: MouseEvent) => {
             if (didDragRef.current) {
                 const snappedTop = snapToHour(dragTopRef.current);
                 setDragTop(snappedTop);
@@ -71,9 +87,15 @@ export default function TaskCard({
                 const newStart = topToTime(snappedTop);
                 const duration = getDurationInMinutes(task.startTime, task.endTime);
                 const newEnd = minutesToTime(timeToMinutes(newStart) + duration);
+                
+                const newDay =
+                    getDayFromClientX(
+                        e.clientX
+                    ) ?? task.day;
 
                 onMove({
                     ...task,
+                    day: newDay,
                     startTime: newStart,
                     endTime: newEnd,
                     updatedAt: new Date(),
@@ -113,7 +135,7 @@ export default function TaskCard({
                 top: dragTop,
                 height: `${getTaskHeight(task.startTime, task.endTime)}px`,
                 cursor: dragging ? "grabbing" : "grab",
-                transform: dragging ? "scale(1.02)" : "scale(1)",
+                transform: `translateX(${dragLeft}px) scale(${dragging ? 1.02 : 1})`,
                 opacity: dragging ? 0.9 : 1,
                 userSelect: dragging ? "none" : "auto",
             }}

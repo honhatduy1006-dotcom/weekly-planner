@@ -1,6 +1,7 @@
 import TimeColumn from "./TimeColumn";
 import DayColumn from "./DayColumn";
 import type { Task } from "../../types/task";
+import { useRef } from "react";
 
 type CalendarBodyProps = {
     days: string[];
@@ -19,6 +20,35 @@ export default function CalendarBody({
     onDelete,
     onMove,
 }: CalendarBodyProps) {
+
+    const columnRects = useRef<Map<string, DOMRect>>(
+        new Map()
+    );
+
+    const registerColumn = (
+        day: string,
+        rect: DOMRect
+    ) => { columnRects.current.set(day, rect); };
+
+    const getDayFromClientX = (
+    clientX: number
+    ): string | null => {
+
+        for (const [day, rect] of columnRects.current) {
+
+            if (
+                clientX >= rect.left &&
+                clientX <= rect.right
+            ) {
+                return day;
+            }
+
+        }
+
+        return null;
+
+    };
+
     return (
         <div 
             className="
@@ -37,6 +67,8 @@ export default function CalendarBody({
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onMove={onMove}
+                    registerColumn={registerColumn}
+                    getDayFromClientX={getDayFromClientX}
                 />
             ))}
         </div>

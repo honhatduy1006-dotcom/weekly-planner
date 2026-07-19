@@ -1,6 +1,7 @@
 import type { Task } from "../../types/task";
 import TaskCard from "../TaskCard/TaskCard";
 import { getTaskTop } from "../../utils/time";
+import { useLayoutEffect, useRef } from "react";
 
 type DayColumnProps = {
     day: string;
@@ -9,6 +10,13 @@ type DayColumnProps = {
     onEdit: (task: Task) => void;
     onMove: (task: Task) => void;
     onDelete: (task: Task) => void;
+    registerColumn: (
+        day: string,
+        rect: DOMRect
+    ) => void;
+    getDayFromClientX: (
+        clientX: number
+    ) => string | null;
 };
 
 export default function DayColumn({
@@ -18,15 +26,34 @@ export default function DayColumn({
     onEdit,
     onDelete,
     onMove,
+    registerColumn,
+    getDayFromClientX,
+    
 }: DayColumnProps) {
 
-    const dayTasks = tasks.filter(
-        task => task.day === day
-    );
+    const dayTasks =
+        tasks.filter(
+            task => task.day === day
+        );
+
+    const columnRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+
+            if (!columnRef.current) return;
+
+            registerColumn(
+                day,
+                columnRef.current.getBoundingClientRect()
+            );
+
+        }, [day]);
 
     return (
 
-        <div className="relative">
+        <div
+            ref={columnRef} 
+            className="relative">
 
             {/* Grid Layer */}
 
@@ -60,6 +87,7 @@ export default function DayColumn({
                             onEdit={onEdit}
                             onDelete={onDelete}
                             onMove={onMove}
+                            getDayFromClientX={getDayFromClientX}
                         />
 
                     );
