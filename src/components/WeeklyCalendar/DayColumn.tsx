@@ -1,6 +1,6 @@
 import type { Task } from "../../types/task";
 import TaskCard from "../TaskCard/TaskCard";
-import { getTaskTop } from "../../utils/time";
+import { getTaskTop, HOUR_HEIGHT } from "../../utils/time";
 import { useLayoutEffect, useRef } from "react";
 
 type DayColumnProps = {
@@ -10,13 +10,8 @@ type DayColumnProps = {
     onEdit: (task: Task) => void;
     onMove: (task: Task) => void;
     onDelete: (task: Task) => void;
-    registerColumn: (
-        day: string,
-        rect: DOMRect
-    ) => void;
-    getDayFromClientX: (
-        clientX: number
-    ) => string | null;
+    registerColumn: (day: string, rect: DOMRect) => void;
+    getDayFromClientX: (clientX: number) => string | null;
 };
 
 export default function DayColumn({
@@ -48,6 +43,9 @@ export default function DayColumn({
             );
 
         }, [day]);
+
+    const minTop = 0;
+    const maxTop = hours.length * HOUR_HEIGHT;
 
     return (
 
@@ -88,6 +86,8 @@ export default function DayColumn({
                             onDelete={onDelete}
                             onMove={onMove}
                             getDayFromClientX={getDayFromClientX}
+                            minTop={minTop}
+                            maxTop={maxTop}
                         />
 
                     );

@@ -9,53 +9,40 @@ import { timeToMinutes } from "../../utils/time";
 
 type TaskCardProps = {
     task: Task;
-    top:number;
+    top: number;
     onEdit(task: Task): void;
     onDelete(task: Task): void;
     onMove: (task: Task) => void;
-    getDayFromClientX: (
-        clientX: number
-    ) => string | null;
+    getDayFromClientX: (clientX: number) => string | null;
+    minTop: number;
+    maxTop: number;
 };
 
-export default function TaskCard({ 
+export default function TaskCard({
     task,
     top,
     onEdit,
     onDelete,
     onMove,
     getDayFromClientX,
- }: TaskCardProps) {
-
+    minTop,
+    maxTop,
+}: TaskCardProps) {
     const [dragging, setDragging] = useState(false);
+    const [offsetY, setOffsetY] = useState(0);
+    const [offsetX, setOffsetX] = useState(0);
 
-    const [dragTop, setDragTop] = useState(top);
-
-    const [startY, setStartY] = useState(0);
-
-    const [startTop, setStartTop] = useState(top);
-
-    const [dragLeft, setDragLeft] = useState(0);
-
-    const [startX, setStartX] = useState(0);
-
-    const [startLeft, setStartLeft] = useState(0);
-
-    const dragTopRef = useRef(top);
-
+    const startYRef = useRef(0);
+    const startXRef = useRef(0);
+    const offsetYRef = useRef(0);
     const didDragRef = useRef(false);
 
-    useEffect(() => {
-        setDragTop(top);
-        dragTopRef.current = top;
-    }, [top]);
+    const taskHeight = getTaskHeight(task.startTime, task.endTime);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         setDragging(true);
-        setStartY(e.clientY);
-        setStartTop(dragTop);
-        setStartX(e.clientX);
-        setStartLeft(0);
+        startYRef.current = e.clientY;
+        startXRef.current = e.clientX;
         didDragRef.current = false;
     };
 
@@ -65,33 +52,40 @@ export default function TaskCard({
         const DRAG_THRESHOLD = 5;
 
         const handleMouseMove = (e: MouseEvent) => {
-            const delta = e.clientY - startY;
-            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startYRef.current;
+            const deltaX = e.clientX - startXRef.current;
 
-            if (Math.abs(delta) > DRAG_THRESHOLD) {
+            if (Math.abs(deltaY) > DRAG_THRESHOLD || Math.abs(deltaX) > DRAG_THRESHOLD) {
                 didDragRef.current = true;
             }
 
-            const newTop = startTop + delta;
-            setDragTop(newTop);
-            setDragLeft(startLeft + deltaX);
-            dragTopRef.current = newTop;
+            const rawTop = top + deltaY;
+            const clampedTop = Math.max(
+                minTop,
+                Math.min(rawTop, maxTop - taskHeight)
+            );
+            const clampedDeltaY = clampedTop - top;
+
+            offsetYRef.current = clampedDeltaY;
+            setOffsetY(clampedDeltaY);
+            setOffsetX(deltaX)
         };
 
         const handleMouseUp = (e: MouseEvent) => {
             if (didDragRef.current) {
-                const snappedTop = snapToHour(dragTopRef.current);
-                setDragTop(snappedTop);
-                dragTopRef.current = snappedTop;
+                const rawTop = top + offsetYRef.current;
+                const snappedTop = snapToHour(rawTop);
+
+                const clampedSnappedTop = Math.max(
+                    minTop,
+                    Math.min(snappedTop, maxTop - taskHeight)
+                );
 
                 const newStart = topToTime(snappedTop);
                 const duration = getDurationInMinutes(task.startTime, task.endTime);
                 const newEnd = minutesToTime(timeToMinutes(newStart) + duration);
-                
-                const newDay =
-                    getDayFromClientX(
-                        e.clientX
-                    ) ?? task.day;
+
+                const newDay = getDayFromClientX(e.clientX) ?? task.day;
 
                 onMove({
                     ...task,
@@ -100,11 +94,11 @@ export default function TaskCard({
                     endTime: newEnd,
                     updatedAt: new Date(),
                 });
-            } else {
-                setDragTop(startTop);
-                dragTopRef.current = startTop;
             }
 
+            setOffsetY(0);
+            setOffsetX(0);
+            offsetYRef.current = 0;
             setDragging(false);
         };
 
@@ -115,7 +109,7 @@ export default function TaskCard({
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [dragging, startY, startTop]);
+    }, [dragging]);
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (didDragRef.current) {
@@ -130,14 +124,14 @@ export default function TaskCard({
         <div
             onClick={handleClick}
             onMouseDown={handleMouseDown}
-
             style={{
-                top: dragTop,
+                top, // cố định theo prop, không đổi khi đang kéo
                 height: `${getTaskHeight(task.startTime, task.endTime)}px`,
                 cursor: dragging ? "grabbing" : "grab",
-                transform: `translateX(${dragLeft}px) scale(${dragging ? 1.02 : 1})`,
+                transform: `translate(${offsetX}px, ${offsetY}px) scale(${dragging ? 1.02 : 1})`,
                 opacity: dragging ? 0.9 : 1,
                 userSelect: dragging ? "none" : "auto",
+                willChange: dragging ? "transform" : "auto",
             }}
             className={`
                 absolute
@@ -147,7 +141,7 @@ export default function TaskCard({
                 rounded-lg
                 shadow-md
                 hover:shadow-xl
-                transition
+                ${dragging ? "" : "transition"}
                 text-white
                 flex
                 flex-col
@@ -158,77 +152,39 @@ export default function TaskCard({
                 z-20
             `}
         >
-            <h3 className="
-                    font-semibold
-                    text-sm
-                    leading-5
-                    truncate
-            ">
+            <h3 className="font-semibold text-sm leading-5 truncate">
                 {task.title}
             </h3>
 
             {task.description && (
-                <p className="
-                    mt-1
-                    text-xs
-                    leading-4
-                    opacity-90
-                    line-clamp-2
-                ">
+                <p className="mt-1 text-xs leading-4 opacity-90 line-clamp-2">
                     {task.description}
                 </p>
             )}
 
-            <div className="
-                    mt-2
-                    text-[11px]
-                    leading-4
-                    font-medium
-                    opacity-80
-            ">
+            <div className="mt-2 text-[11px] leading-4 font-medium opacity-80">
                 {task.startTime} - {task.endTime}
             </div>
 
             <span
                 className={`
-                    mt-2
-                    inline-block
-                    rounded-full
-                    px-2
-                    py-1
-                    text-[10px]
-                    font-semibold
-                    ${
-                        task.completed
-                            ? "bg-green-600 text-white"
-                            : "bg-yellow-500 text-white"
-                    }
+                    mt-2 inline-block rounded-full px-2 py-1 text-[10px] font-semibold
+                    ${task.completed ? "bg-green-600 text-white" : "bg-yellow-500 text-white"}
                 `}
             >
                 {task.completed ? "Completed" : "In Progress"}
             </span>
 
             <div className="absolute top-2 right-2">
-
                 <button
-
                     onClick={(e) => {
-
                         e.stopPropagation();
-
                         onDelete(task);
-
                     }}
-
-                    className="
-                        rounded
-                        p-1
-                        hover:bg-white/20
-                    "
+                    className="rounded p-1 hover:bg-white/20"
                 >
                     🗑
                 </button>
-
             </div>
         </div>
     );

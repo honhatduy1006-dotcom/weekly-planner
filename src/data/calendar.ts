@@ -9,6 +9,6 @@ export const DAYS = [
 ];
 
 export const HOURS = Array.from(
-  { length: 17 },
-  (_, i) => `${String(i + 6).padStart(2, "0")}:00`
+  { length: 23 },
+  (_, i) => `${String(i + 0).padStart(2, "0")}:00`
 );
