@@ -1,7 +1,7 @@
 import type { Task } from "../../types/task";
 import { getTaskHeight } from "../../utils/time";
 import { useEffect, useState, useRef } from "react";
-import { snapToHour } from "../../utils/time";
+import { snapToInterval } from "../../utils/time";
 import { topToTime } from "../../utils/time";
 import { getDurationInMinutes } from "../../utils/time";
 import { minutesToTime } from "../../utils/time";
@@ -74,7 +74,7 @@ export default function TaskCard({
         const handleMouseUp = (e: MouseEvent) => {
             if (didDragRef.current) {
                 const rawTop = top + offsetYRef.current;
-                const snappedTop = snapToHour(rawTop);
+                const snappedTop = snapToInterval(rawTop);
 
                 const clampedSnappedTop = Math.max(
                     minTop,

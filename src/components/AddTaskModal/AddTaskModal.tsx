@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { DAYS, HOURS } from "../../data/calendar";
 import type { Task } from "../../types/task";
-import { isValidTimeRange } from "../../utils/time";
+import {
+    isValidTimeRange,
+    generateHourOptions,
+    MINUTE_OPTIONS,
+    splitTime,
+    joinTime,
+} from "../../utils/time";
+
+const HOUR_OPTIONS = generateHourOptions();
 
 type AddTaskModalProps = {
     isOpen: boolean;
@@ -17,17 +25,15 @@ export default function AddTaskModal({
     task,
 }: AddTaskModalProps) {
     const [title, setTitle] = useState("");
-
     const [description, setDescription] = useState("");
-
     const [day, setDay] = useState("Mon");
 
-    const [startTime, setStartTime] = useState("08:00");
-
-    const [endTime, setEndTime] = useState("09:00");
+    const [startHour, setStartHour] = useState("08");
+    const [startMinute, setStartMinute] = useState("00");
+    const [endHour, setEndHour] = useState("09");
+    const [endMinute, setEndMinute] = useState("00");
 
     const [color, setColor] = useState("bg-blue-500");
-
     const [completed, setCompleted] = useState(false);
 
     const [errors, setErrors] = useState({
@@ -43,10 +49,16 @@ export default function AddTaskModal({
             setTitle(task.title);
             setDescription(task.description ?? "");
             setDay(task.day);
-            setStartTime(task.startTime);
-            setEndTime(task.endTime);
-            setColor(task.color);
 
+            const start = splitTime(task.startTime);
+            setStartHour(start.hour);
+            setStartMinute(start.minute);
+
+            const end = splitTime(task.endTime);
+            setEndHour(end.hour);
+            setEndMinute(end.minute);
+
+            setColor(task.color);
             setCompleted(task.completed);
 
         } else {
@@ -54,10 +66,11 @@ export default function AddTaskModal({
             setTitle("");
             setDescription("");
             setDay("Mon");
-            setStartTime("08:00");
-            setEndTime("09:00");
+            setStartHour("08");
+            setStartMinute("00");
+            setEndHour("09");
+            setEndMinute("00");
             setColor("bg-blue-500");
-
             setCompleted(false);
 
         }
@@ -67,64 +80,51 @@ export default function AddTaskModal({
     if (!isOpen) return null;
 
     const handleSave = () => {
+        const startTime = joinTime(startHour, startMinute);
+        const endTime = joinTime(endHour, endMinute);
 
-    const newErrors = {
-        title: "",
-        startTime: "",
-        endTime: "",
+        const newErrors = {
+            title: "",
+            startTime: "",
+            endTime: "",
+        };
+
+        if (!title.trim()) {
+            newErrors.title = "Title is required";
+        }
+
+        if (!isValidTimeRange(startTime, endTime)) {
+            newErrors.endTime =
+                "End time must be after start time";
+        }
+
+        setErrors(newErrors);
+
+        if (newErrors.title || newErrors.endTime) {
+            return;
+        }
+
+        const newTask: Task = {
+            id: task?.id ?? crypto.randomUUID(),
+            title,
+            description,
+            day,
+            startTime,
+            endTime,
+            color,
+            completed,
+            createdAt: task?.createdAt ?? new Date(),
+            updatedAt: new Date(),
+        };
+
+        onSave(newTask);
+
     };
-
-    if (!title.trim()) {
-        newErrors.title = "Title is required";
-    }
-
-    if (!isValidTimeRange(startTime, endTime)) {
-        newErrors.endTime =
-            "End time must be after start time";
-    }
-
-    setErrors(newErrors);
-
-    if (
-        newErrors.title ||
-        newErrors.endTime
-    ) {
-        return;
-    }
-
-    const newTask: Task = {
-        id: task?.id ?? crypto.randomUUID(),
-
-        title,
-        description,
-        day,
-        startTime,
-        endTime,
-        color,
-
-        completed,
-
-        createdAt: task?.createdAt ?? new Date(),
-        updatedAt: new Date(),
-    };
-
-    onSave(newTask);
-
-};
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 py-8">
 
-            <div className="
-                    bg-white
-                    w-full
-                    max-w-xl
-                    rounded-2xl
-                    shadow-2xl
-                    p-8
-                    max-h-[90vh]
-                    overflow-y-auto
-            ">
+            <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
 
                 <h2 className="text-3xl font-bold text-gray-800 mb-8">
                     {task ? "Edit Task" : "Add New Task"}
@@ -132,12 +132,7 @@ export default function AddTaskModal({
 
                 {/* Title */}
                 <div className="mb-6">
-                    <label className="
-                                block
-                                mb-2
-                                text-sm
-                                font-semibold
-                                text-gray-700">
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
                         Title
                     </label>
 
@@ -146,21 +141,7 @@ export default function AddTaskModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Study React..."
-                        className="
-                            w-full
-                            rounded-lg
-                            border
-                            border-gray-300
-                            px-4
-                            py-3
-                            text-gray-700
-                            shadow-sm
-                            transition
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-200
-                            focus:outline-none
-                        "
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                     />
 
                     {errors.title && (
@@ -172,12 +153,7 @@ export default function AddTaskModal({
 
                 {/* Description */}
                 <div className="mb-6">
-                    <label className="
-                                block
-                                mb-2
-                                text-sm
-                                font-semibold
-                                text-gray-700">
+                    <label className=" block mb-2 text-sm font-semibold text-gray-700">
                         Description
                     </label>
 
@@ -185,51 +161,20 @@ export default function AddTaskModal({
                         rows={4}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="
-                            w-full
-                            rounded-lg
-                            border
-                            border-gray-300
-                            px-4
-                            py-3
-                            resize-none
-                            shadow-sm
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-200
-                            focus:outline-none
-                        "
+                        className=" w-full rounded-lg border border-gray-300 px-4 py-3 resize-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                     />
                 </div>
 
                 {/* Day */}
                 <div className="mb-6">
-                    <label className="
-                                block
-                                mb-2
-                                text-sm
-                                font-semibold
-                                text-gray-700">
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
                         Day
                     </label>
 
                     <select
                         value={day}
                         onChange={(e) => setDay(e.target.value)}
-                        className="
-                            w-full
-                            rounded-lg
-                            border
-                            border-gray-300
-                            px-4
-                            py-3
-                            resize-none
-                            shadow-sm
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-200
-                            focus:outline-none
-                        "
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 resize-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                     >
                         {DAYS.map((d) => (
                             <option key={d} value={d}>
@@ -239,103 +184,72 @@ export default function AddTaskModal({
                     </select>
                 </div>
 
-                {/* Time */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-
-                    <div>
-                        <label className="
-                                    block
-                                    mb-2
-                                    text-sm
-                                    font-semibold
-                                    text-gray-700">
-                            Start Time
-                        </label>
+                 {/* Start Time */}
+                <div className="mb-4">
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
+                        Start Time
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <select
+                            value={startHour}
+                            onChange={(e) => setStartHour(e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        >
+                            {HOUR_OPTIONS.map((h) => (
+                                <option key={h} value={h}>{h} giờ</option>
+                            ))}
+                        </select>
 
                         <select
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            className="
-                                w-full
-                                rounded-lg
-                                border
-                                border-gray-300
-                                px-4
-                                py-3
-                                resize-none
-                                shadow-sm
-                                focus:border-blue-500
-                                focus:ring-2
-                                focus:ring-blue-200
-                                focus:outline-none
-                            "
+                            value={startMinute}
+                            onChange={(e) => setStartMinute(e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                         >
-                            {HOURS.map((hour) => (
-                                <option key={hour}>
-                                    {hour}
-                                </option>
+                            {MINUTE_OPTIONS.map((m) => (
+                                <option key={m} value={m}>{m} phút</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* End Time */}
+                <div className="mb-6">
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
+                        End Time
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <select
+                            value={endHour}
+                            onChange={(e) => setEndHour(e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        >
+                            {HOUR_OPTIONS.map((h) => (
+                                <option key={h} value={h}>{h} giờ</option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={endMinute}
+                            onChange={(e) => setEndMinute(e.target.value)}
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        >
+                            {MINUTE_OPTIONS.map((m) => (
+                                <option key={m} value={m}>{m} phút</option>
                             ))}
                         </select>
                     </div>
 
-                    <div>
-                        <label className="
-                                    block
-                                    mb-2
-                                    text-sm
-                                    font-semibold
-                                    text-gray-700">
-                            End Time
-                        </label>
-
-                        <select
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.target.value)}
-                            className="
-                                w-full
-                                rounded-lg
-                                border
-                                border-gray-300
-                                px-4
-                                py-3
-                                resize-none
-                                shadow-sm
-                                focus:border-blue-500
-                                focus:ring-2
-                                focus:ring-blue-200
-                                focus:outline-none
-                            "
-                        >
-                            {HOURS.map((hour) => (
-                                <option key={hour} value={hour}>
-                                    {hour}
-                                </option>
-                            ))}
-                        </select>
-
-                        {errors.endTime && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.endTime}
-                            </p>
-                        )}
-                    </div>
-
+                    {errors.endTime && (
+                        <p className="mt-1 text-sm text-red-500">{errors.endTime}</p>
+                    )}
                 </div>
 
                 {/* Color */}
                 <div className="mb-6">
-
-                    <label className="
-                                block
-                                mb-2
-                                text-sm
-                                font-semibold
-                                text-gray-700">
+                    <label className="block mb-2 text-sm font-semibold text-gray-700">
                         Color
                     </label>
-
                     <div className="flex gap-4 mt-3">
-
                         {[
                             "bg-blue-500",
                             "bg-green-500",
@@ -343,130 +257,54 @@ export default function AddTaskModal({
                             "bg-yellow-500",
                             "bg-purple-500",
                         ].map((c) => (
-
                             <button
                                 key={c}
                                 type="button"
                                 onClick={() => setColor(c)}
-                                className={`
-                                    w-10
-                                    h-10
-                                    rounded-full
-                                    transition
-                                    hover:scale-110
-                                    ${c}
-                                    ${
-                                        color === c
-                                            ? "ring-4 ring-gray-400"
-                                            : ""
-                                    }
-                                `}
+                                className={`w-10 h-10 rounded-full transition hover:scale-110 ${c} ${
+                                    color === c ? "ring-4 ring-gray-400" : ""
+                                }`}
                             />
-
                         ))}
-
                     </div>
-
                 </div>
 
                 {task && (
-
-                <div className="mb-6">
-
-                    <label
-                        className="
-                            block
-                            mb-2
-                            text-sm
-                            font-semibold
-                            text-gray-700
-                        "
-                    >
-                        Status
-                    </label>
-
-                    <label className="flex items-center gap-3">
-
-                        <input
-                            type="checkbox"
-                            checked={completed}
-                            onChange={(e) =>
-                                setCompleted(e.target.checked)
-                            }
-                            className="
-                                w-5
-                                h-5
-                                accent-blue-600
-                            "
-                        />
-
-                        <span className="text-gray-700">
-
-                            {completed
-                                ? "Completed"
-                                : "In Progress"}
-
-                        </span>
-
-                    </label>
-
-                </div>
-
+                    <div className="mb-6">
+                        <label className="block mb-2 text-sm font-semibold text-gray-700">
+                            Status
+                        </label>
+                        <label className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                checked={completed}
+                                onChange={(e) => setCompleted(e.target.checked)}
+                                className="w-5 h-5 accent-blue-600"
+                            />
+                            <span className="text-gray-700">
+                                {completed ? "Completed" : "In Progress"}
+                            </span>
+                        </label>
+                    </div>
                 )}
 
                 {/* Footer */}
-                <div className="
-                        mt-8
-                        flex
-                        justify-end
-                        gap-4
-                        border-t
-                        pt-6"
-                    >
-
+                <div className="mt-8 flex justify-end gap-4 border-t pt-6">
                     <button
                         onClick={onClose}
-                        className="
-                            px-6
-                            
-                            py-2.5
-
-                            rounded-lg
-
-                            bg-gray-100
-
-                            font-medium
-
-                            hover:bg-gray-200
-
-                            transition
-                        "
+                        className="px-6 py-2.5 rounded-lg bg-gray-100 font-medium hover:bg-gray-200 transition"
                     >
                         Cancel
                     </button>
-
                     <button
                         onClick={handleSave}
-                        className="
-                            bg-blue-600
-                            hover:bg-blue-700
-                            text-white
-                            px-6
-                            py-2.5
-                            rounded-lg
-                            font-medium
-                            transition
-                            shadow-sm
-                            hover:shadow-md
-                        "
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-sm hover:shadow-md"
                     >
                         {task ? "Update" : "Save"}
                     </button>
-
                 </div>
 
             </div>
-
         </div>
     );
 }
