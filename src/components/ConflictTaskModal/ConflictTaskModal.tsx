@@ -27,17 +27,17 @@ export default function ConflictTaskModal({
             <div className="bg-white rounded-2xl p-8 w-[600px] shadow-2xl">
 
                 <h2 className="text-2xl font-bold text-orange-600">
-                    ⚠ Task Conflict
+                    ⚠ Trùng Task
                 </h2>
 
                 <p className="mt-3 text-gray-600">
-                    The task you're adding overlaps with existing task(s).
+                    Task bạn vừa thêm bị trùng rùi đóa
                 </p>
 
                 <div className="mt-6">
 
                     <h3 className="font-semibold">
-                        New Task
+                        Task mới
                     </h3>
 
                     <div className="mt-2 rounded-lg border p-4">
@@ -61,7 +61,7 @@ export default function ConflictTaskModal({
                 <div className="mt-6">
 
                     <h3 className="font-semibold">
-                        Conflicting Tasks
+                        Task bị trùng
                     </h3>
 
                     <div className="space-y-3 mt-3">
@@ -99,21 +99,21 @@ export default function ConflictTaskModal({
                         onClick={onCancel}
                         className="px-5 py-2 rounded bg-gray-200"
                     >
-                        Cancel
+                        Hủy bỏ
                     </button>
 
                     <button
                         onClick={onEdit}
                         className="px-5 py-2 rounded bg-yellow-500 text-white"
                     >
-                        Edit New Task
+                        Sửa Task mới
                     </button>
 
                     <button
                         onClick={onAddAnyway}
                         className="px-5 py-2 rounded bg-red-600 text-white"
                     >
-                        Add Anyway
+                        Kệ lưu luôn
                     </button>
 
                 </div>

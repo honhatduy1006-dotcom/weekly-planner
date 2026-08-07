@@ -32,19 +32,15 @@ export default function DeleteTaskModal({
                     <div>
 
                         <h2 className="text-2xl font-bold text-red-600">
-                            Delete Task
+                            Xóa Task
                         </h2>
-
-                        <p className="text-sm text-gray-500">
-                            This action cannot be undone.
-                        </p>
 
                     </div>
 
                 </div>
 
                 <p className="mt-5 text-gray-700">
-                    Are you sure you want to permanently delete this task?
+                    Bro muốn xóa task này hả? Bro đã xong chưa đấy?
                 </p>
 
                 <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -63,7 +59,7 @@ export default function DeleteTaskModal({
 
                         <div className="flex justify-between">
                             <span className="font-medium text-gray-500">
-                                Day
+                                Ngày
                             </span>
 
                             <span>{task.day}</span>
@@ -71,7 +67,7 @@ export default function DeleteTaskModal({
 
                         <div className="flex justify-between">
                             <span className="font-medium text-gray-500">
-                                Time
+                                Thời gian
                             </span>
 
                             <span>
@@ -81,7 +77,7 @@ export default function DeleteTaskModal({
 
                         <div className="flex justify-between">
                             <span className="font-medium text-gray-500">
-                                Status
+                                Tình trạng
                             </span>
 
                             <span
@@ -92,15 +88,15 @@ export default function DeleteTaskModal({
                                 }`}
                             >
                                 {task.completed
-                                    ? "Completed"
-                                    : "In Progress"}
+                                    ? "Đã hoàn thành"
+                                    : "Chưa hoàn thành"}
                             </span>
                         </div>
 
                         <div className="flex justify-between items-center">
 
                             <span className="font-medium text-gray-500">
-                                Color
+                                Màu sắc
                             </span>
 
                             <div
@@ -116,7 +112,7 @@ export default function DeleteTaskModal({
 
                         <div className="flex justify-between">
                             <span className="font-medium text-gray-500">
-                                Created
+                                Tạo lúc
                             </span>
 
                             <span>
@@ -126,7 +122,7 @@ export default function DeleteTaskModal({
 
                         <div className="flex justify-between">
                             <span className="font-medium text-gray-500">
-                                Updated
+                                Cập nhật lúc
                             </span>
 
                             <span>
@@ -137,10 +133,6 @@ export default function DeleteTaskModal({
                     </div>
 
                 </div>
-
-                <p className="mt-4 text-sm text-gray-500">
-                    This action cannot be undone.
-                </p>
 
                 <div className="mt-8 flex justify-end gap-3">
 
@@ -154,7 +146,7 @@ export default function DeleteTaskModal({
                             hover:bg-gray-300
                         "
                     >
-                        Cancel
+                        Hủy bỏ
                     </button>
 
                     <button
@@ -170,7 +162,7 @@ export default function DeleteTaskModal({
                             hover:bg-red-700
                         "
                     >
-                        Delete Task
+                        Xóa Task
                     </button>
 
                 </div>

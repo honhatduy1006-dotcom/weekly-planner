@@ -14,7 +14,7 @@ export default function Navbar({
                     </h1>
 
                     <p className="text-sm text-gray-500">
-                        Organize your week efficiently
+                        Giúp bạn lập lịch làm việc hiệu quả hơn, hoặc không:)
                     </p>
                 </div>
 
@@ -22,7 +22,7 @@ export default function Navbar({
                     onClick={onAddTask}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg"
                 >
-                    + Add Task
+                    + Thêm Task
                 </button>
             </div>
         </header>

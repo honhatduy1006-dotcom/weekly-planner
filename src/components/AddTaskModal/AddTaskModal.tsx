@@ -90,12 +90,12 @@ export default function AddTaskModal({
         };
 
         if (!title.trim()) {
-            newErrors.title = "Title is required";
+            newErrors.title = "Thiếu tiêu đề";
         }
 
         if (!isValidTimeRange(startTime, endTime)) {
             newErrors.endTime =
-                "End time must be after start time";
+                "Kết thúc phải lớn hơn bắt đầu";
         }
 
         setErrors(newErrors);
@@ -127,13 +127,13 @@ export default function AddTaskModal({
             <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
 
                 <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                    {task ? "Edit Task" : "Add New Task"}
+                    {task ? "Sửa Task" : "Thêm Task"}
                 </h2>
 
                 {/* Title */}
                 <div className="mb-6">
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        Title
+                        Tiêu đề
                     </label>
 
                     <input
@@ -154,7 +154,7 @@ export default function AddTaskModal({
                 {/* Description */}
                 <div className="mb-6">
                     <label className=" block mb-2 text-sm font-semibold text-gray-700">
-                        Description
+                        Mô tả
                     </label>
 
                     <textarea
@@ -168,7 +168,7 @@ export default function AddTaskModal({
                 {/* Day */}
                 <div className="mb-6">
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        Day
+                        Ngày
                     </label>
 
                     <select
@@ -187,7 +187,7 @@ export default function AddTaskModal({
                  {/* Start Time */}
                 <div className="mb-4">
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        Start Time
+                        Bắt đầu
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                         <select
@@ -215,7 +215,7 @@ export default function AddTaskModal({
                 {/* End Time */}
                 <div className="mb-6">
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        End Time
+                        Kết thúc
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                         <select
@@ -247,7 +247,7 @@ export default function AddTaskModal({
                 {/* Color */}
                 <div className="mb-6">
                     <label className="block mb-2 text-sm font-semibold text-gray-700">
-                        Color
+                        Màu sắc
                     </label>
                     <div className="flex gap-4 mt-3">
                         {[
@@ -272,7 +272,7 @@ export default function AddTaskModal({
                 {task && (
                     <div className="mb-6">
                         <label className="block mb-2 text-sm font-semibold text-gray-700">
-                            Status
+                            Trạng thái
                         </label>
                         <label className="flex items-center gap-3">
                             <input
@@ -282,7 +282,7 @@ export default function AddTaskModal({
                                 className="w-5 h-5 accent-blue-600"
                             />
                             <span className="text-gray-700">
-                                {completed ? "Completed" : "In Progress"}
+                                {completed ? "Đã hoàn thành" : "Chưa hoàn thành"}
                             </span>
                         </label>
                     </div>
@@ -294,13 +294,13 @@ export default function AddTaskModal({
                         onClick={onClose}
                         className="px-6 py-2.5 rounded-lg bg-gray-100 font-medium hover:bg-gray-200 transition"
                     >
-                        Cancel
+                        Hủy bỏ
                     </button>
                     <button
                         onClick={handleSave}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-sm hover:shadow-md"
                     >
-                        {task ? "Update" : "Save"}
+                        {task ? "Cập nhật" : "Lưu"}
                     </button>
                 </div>
 
