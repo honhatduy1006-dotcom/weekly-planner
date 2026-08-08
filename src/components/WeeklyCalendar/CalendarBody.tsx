@@ -10,6 +10,7 @@ type CalendarBodyProps = {
     onEdit: (task: Task) => void;
     onMove: (task: Task) => void;
     onDelete: (task: Task) => void;
+    onCreateTask: (day: string, startTime: string, endTime: string) => void;
 };
 
 export default function CalendarBody({
@@ -19,6 +20,7 @@ export default function CalendarBody({
     onEdit,
     onDelete,
     onMove,
+    onCreateTask,
 }: CalendarBodyProps) {
 
     const columnRects = useRef<Map<string, DOMRect>>(
@@ -67,6 +69,7 @@ export default function CalendarBody({
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onMove={onMove}
+                    onCreateTask={onCreateTask} 
                     registerColumn={registerColumn}
                     getDayFromClientX={getDayFromClientX}
                 />

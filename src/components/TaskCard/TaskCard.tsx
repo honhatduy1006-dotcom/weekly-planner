@@ -45,6 +45,7 @@ export default function TaskCard({
     const isVeryCompact = taskHeight < 60;
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
         setDragging(true);
         startYRef.current = e.clientY;
         startXRef.current = e.clientX;
@@ -138,6 +139,7 @@ export default function TaskCard({
                 left-1
                 right-1
                 overflow-hidden
+                pointer-events-auto
                 ${task.color}
                 rounded-lg
                 shadow-md

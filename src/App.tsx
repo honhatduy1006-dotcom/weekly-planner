@@ -24,6 +24,12 @@ function App() {
 
     const [isConflictOpen, setIsConflictOpen] = useState(false);
 
+    const [createDraft, setCreateDraft] = useState<{
+        day: string;
+        startTime: string;
+        endTime: string;
+    } | null>(null);
+
     const saveTask = (task: Task) => {
 
         setTasks(prev => {
@@ -46,6 +52,8 @@ function App() {
         });
 
         setSelectedTask(null);
+
+        setCreateDraft(null);
 
         setIsModalOpen(false);
 
@@ -89,6 +97,7 @@ function App() {
         setPendingTask(null);
         setConflicts([]);
         setIsConflictOpen(false);
+        setCreateDraft(null);
         setIsModalOpen(false);
 
     };
@@ -136,11 +145,26 @@ function App() {
 
     };
 
+    const handleCreateTask = (
+        day: string,
+        startTime: string,
+        endTime: string
+    ) => {
+
+        setSelectedTask(null);
+
+        setCreateDraft({ day, startTime, endTime });
+
+        setIsModalOpen(true);
+
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar
                 onAddTask={() => {
                     setSelectedTask(null);
+                    setCreateDraft(null);
                     setIsModalOpen(true);
                 }}
             />
@@ -150,6 +174,7 @@ function App() {
                 onEdit={handleEditTask}
                 onDelete={handleRequestDelete}
                 onMove={handleSaveTask}
+                onCreateTask={handleCreateTask}
             />
 
             <AddTaskModal
@@ -157,9 +182,11 @@ function App() {
                 onClose={() => {
                     setSelectedTask(null);
                     setIsModalOpen(false);
+                    setCreateDraft(null);
                 }}
                 onSave={handleSaveTask}
                 task={selectedTask}
+                initialDraft={createDraft}
             />
 
             <DeleteTaskModal

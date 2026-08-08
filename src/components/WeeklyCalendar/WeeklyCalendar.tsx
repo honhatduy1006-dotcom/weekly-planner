@@ -8,6 +8,7 @@ type WeeklyCalendarProps = {
     onEdit(task: Task): void;
     onDelete(task: Task): void;
     onMove: (task: Task) => void;
+    onCreateTask: (day: string, startTime: string, endTime: string) => void;
 };
 
 export default function WeeklyCalendar({
@@ -15,6 +16,7 @@ export default function WeeklyCalendar({
     onEdit,
     onDelete,
     onMove,
+    onCreateTask,
     
 }: WeeklyCalendarProps) {
     return (
@@ -28,6 +30,7 @@ export default function WeeklyCalendar({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onMove={onMove}
+                onCreateTask={onCreateTask}
 
             />
         </div>

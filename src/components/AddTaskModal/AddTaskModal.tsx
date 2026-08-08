@@ -16,6 +16,7 @@ type AddTaskModalProps = {
     onClose: () => void;
     onSave: (task: Task) => void;
     task?: Task | null;
+    initialDraft?: { day: string; startTime: string; endTime: string } | null;
 };
 
 export default function AddTaskModal({
@@ -23,6 +24,7 @@ export default function AddTaskModal({
     onClose,
     onSave,
     task,
+    initialDraft,
 }: AddTaskModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -61,6 +63,22 @@ export default function AddTaskModal({
             setColor(task.color);
             setCompleted(task.completed);
 
+        } else if (initialDraft) {
+            // Tạo task mới từ kéo-thả trên lịch
+            setTitle("");
+            setDescription("");
+            setDay(initialDraft.day);
+
+            const start = splitTime(initialDraft.startTime);
+            setStartHour(start.hour);
+            setStartMinute(start.minute);
+
+            const end = splitTime(initialDraft.endTime);
+            setEndHour(end.hour);
+            setEndMinute(end.minute);
+
+            setColor("bg-blue-500");
+            setCompleted(false);
         } else {
 
             setTitle("");
@@ -75,7 +93,7 @@ export default function AddTaskModal({
 
         }
 
-    }, [task, isOpen]);
+    }, [task, initialDraft, isOpen]);
 
     if (!isOpen) return null;
 
