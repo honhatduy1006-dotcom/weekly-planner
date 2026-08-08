@@ -1,11 +1,17 @@
 import type { Task } from "../../types/task";
-import { getTaskHeight } from "../../utils/time";
 import { useEffect, useState, useRef } from "react";
-import { snapToInterval } from "../../utils/time";
-import { topToTime } from "../../utils/time";
-import { getDurationInMinutes } from "../../utils/time";
-import { minutesToTime } from "../../utils/time";
-import { timeToMinutes } from "../../utils/time";
+import { 
+    getTaskHeight,
+    snapToInterval,
+    topToTime,
+    getDurationInMinutes,
+    minutesToTime,
+    timeToMinutes,
+    MINUTE_HEIGHT, } from "../../utils/time";
+
+
+const MIN_DURATION_MINUTES = 15;
+const MIN_DURATION_HEIGHT = MIN_DURATION_MINUTES * MINUTE_HEIGHT;
 
 type TaskCardProps = {
     task: Task;
@@ -17,6 +23,8 @@ type TaskCardProps = {
     minTop: number;
     maxTop: number;
 };
+
+type ResizeEdge = "top" | "bottom" | null;
 
 export default function TaskCard({
     task,
@@ -39,13 +47,20 @@ export default function TaskCard({
 
     const taskHeight = getTaskHeight(task.startTime, task.endTime);
 
-    const showDescription = taskHeight >= 100 && !!task.description;
-    const showBadge = taskHeight >= 60;
-    const showTime = taskHeight >= 40;
-    const isVeryCompact = taskHeight < 60;
+    const [resizeEdge, setResizeEdge] = useState<ResizeEdge>(null);
+    const [previewTop, setPreviewTop] = useState(top);
+    const [previewHeight, setPreviewHeight] = useState(taskHeight);
+
+    const resizeStartYRef = useRef(0);
+    const resizeBaseTopRef = useRef(top);
+    const resizeBaseHeightRef = useRef(taskHeight);
+
+    useEffect(() => {
+        setPreviewTop(top);
+        setPreviewHeight(taskHeight);
+    }, [top, taskHeight]);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
         setDragging(true);
         startYRef.current = e.clientY;
         startXRef.current = e.clientX;
@@ -81,6 +96,7 @@ export default function TaskCard({
             if (didDragRef.current) {
                 const rawTop = top + offsetYRef.current;
                 const snappedTop = snapToInterval(rawTop);
+                const clampedSnappedTop = Math.max(minTop, Math.min(snappedTop, maxTop - taskHeight));
 
                 const newStart = topToTime(snappedTop);
                 const duration = getDurationInMinutes(task.startTime, task.endTime);
@@ -112,6 +128,103 @@ export default function TaskCard({
         };
     }, [dragging]);
 
+    const handleResizeMouseDown = (edge: ResizeEdge) => (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        setResizeEdge(edge);
+        resizeStartYRef.current = e.clientY;
+        resizeBaseTopRef.current = top;
+        resizeBaseHeightRef.current = taskHeight;
+        didDragRef.current = false;
+    };
+
+    useEffect(() => {
+        if (!resizeEdge) return;
+
+        const DRAG_THRESHOLD = 5;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const delta = e.clientY - resizeStartYRef.current;
+
+            if (Math.abs(delta) > DRAG_THRESHOLD) {
+                didDragRef.current = true;
+            }
+
+            const baseTop = resizeBaseTopRef.current;
+            const baseHeight = resizeBaseHeightRef.current;
+            const baseBottom = baseTop + baseHeight;
+
+            if (resizeEdge === "top") {
+                const rawTop = baseTop + delta;
+                const clampedTop = Math.max(
+                    minTop,
+                    Math.min(rawTop, baseBottom - MIN_DURATION_HEIGHT)
+                );
+                setPreviewTop(clampedTop);
+                setPreviewHeight(baseBottom - clampedTop);
+            } else {
+                const rawBottom = baseBottom + delta;
+                const clampedBottom = Math.min(
+                    maxTop,
+                    Math.max(rawBottom, baseTop + MIN_DURATION_HEIGHT)
+                );
+                setPreviewTop(baseTop);
+                setPreviewHeight(clampedBottom - baseTop);
+            }
+        };
+
+        const handleMouseUp = () => {
+            if (didDragRef.current) {
+                if (resizeEdge === "top") {
+                    const snappedTop = snapToInterval(previewTop);
+                    const clampedTop = Math.max(
+                        minTop,
+                        Math.min(snappedTop, resizeBaseTopRef.current + resizeBaseHeightRef.current - MIN_DURATION_HEIGHT)
+                    );
+
+                    const newStart = topToTime(clampedTop);
+
+                    onMove({
+                        ...task,
+                        startTime: newStart,
+                        endTime: task.endTime,
+                        updatedAt: new Date(),
+                    });
+                } else {
+                    const baseBottom = resizeBaseTopRef.current + resizeBaseHeightRef.current;
+                    const previewBottom = previewTop + previewHeight;
+                    const snappedBottom = snapToInterval(previewBottom);
+                    const clampedBottom = Math.min(
+                        maxTop,
+                        Math.max(snappedBottom, resizeBaseTopRef.current + MIN_DURATION_HEIGHT)
+                    );
+
+                    const newEnd = topToTime(clampedBottom);
+
+                    onMove({
+                        ...task,
+                        startTime: task.startTime,
+                        endTime: newEnd,
+                        updatedAt: new Date(),
+                    });
+                }
+            } else {
+                // Không đủ threshold để coi là kéo -> reset về vị trí gốc
+                setPreviewTop(top);
+                setPreviewHeight(taskHeight);
+            }
+
+            setResizeEdge(null);
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+        };
+    }, [resizeEdge, previewTop, previewHeight]);
+
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (didDragRef.current) {
             e.preventDefault();
@@ -121,20 +234,30 @@ export default function TaskCard({
         onEdit(task);
     };
 
+    const isInteracting = dragging || resizeEdge !== null;
+
+    const showDescription = taskHeight >= 100 && !!task.description;
+    const showBadge = taskHeight >= 60;
+    const showTime = taskHeight >= 40;
+    const isVeryCompact = taskHeight < 60;
+
     return (
         <div
             onClick={handleClick}
             onMouseDown={handleMouseDown}
             style={{
-                top,
-                height: `${taskHeight}px`,
+                top: resizeEdge ? previewTop : top,
+                height: `${resizeEdge ? previewHeight : taskHeight}px`,
                 cursor: dragging ? "grabbing" : "grab",
-                transform: `translate(${offsetX}px, ${offsetY}px) scale(${dragging ? 1.02 : 1})`,
+                transform: resizeEdge
+                    ? "none"
+                    : `translate(${offsetX}px, ${offsetY}px) scale(${dragging ? 1.02 : 1})`,
                 opacity: dragging ? 0.9 : 1,
                 userSelect: dragging ? "none" : "auto",
                 willChange: dragging ? "transform" : "auto",
             }}
             className={`
+                group
                 absolute
                 left-1
                 right-1
@@ -144,7 +267,7 @@ export default function TaskCard({
                 rounded-lg
                 shadow-md
                 hover:shadow-xl
-                ${dragging ? "" : "transition"}
+                ${isInteracting ? "" : "transition"}
                 text-white
                 flex
                 flex-col
@@ -156,6 +279,31 @@ export default function TaskCard({
                 z-20
             `}
         >
+            <div
+                onMouseDown={handleResizeMouseDown("top")}
+                className="
+                    absolute
+                    top-0
+                    left-0
+                    right-0
+                    h-2
+                    cursor-ns-resize
+                    z-30
+                    flex
+                    justify-center
+                "
+            >
+                <div className="
+                    w-8
+                    h-1
+                    mt-0.5
+                    rounded-full
+                    bg-white/0
+                    group-hover:bg-white/60
+                    transition
+                " />
+            </div>
+
             <h3 className={`
                 font-semibold
                 truncate
@@ -222,6 +370,31 @@ export default function TaskCard({
                 >
                     🗑
                 </button>
+            </div>
+
+             <div
+                onMouseDown={handleResizeMouseDown("bottom")}
+                className="
+                    absolute
+                    bottom-0
+                    left-0
+                    right-0
+                    h-2
+                    cursor-ns-resize
+                    z-30
+                    flex
+                    justify-center
+                "
+            >
+                <div className="
+                    w-8
+                    h-1
+                    mb-0.5
+                    rounded-full
+                    bg-white/0
+                    group-hover:bg-white/60
+                    transition
+                " />
             </div>
         </div>
     );
