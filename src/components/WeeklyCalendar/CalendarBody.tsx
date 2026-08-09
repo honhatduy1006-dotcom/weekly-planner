@@ -11,7 +11,7 @@ type CalendarBodyProps = {
     onEdit: (task: Task) => void;
     onMove: (task: Task) => void;
     onDelete: (task: Task) => void;
-    onCreateTask: (day: string, startTime: string, endTime: string) => void;
+    onCreateTask: (date: string, startTime: string, endTime: string) => void;
 };
 
 export default function CalendarBody({
@@ -44,7 +44,7 @@ export default function CalendarBody({
 
     return (
         <div 
-            className="gridgrid-cols-[90px_repeat(7,minmax(0,1fr))]">
+            className="grid grid-cols-[90px_repeat(7,minmax(0,1fr))]">
             <TimeColumn hours={hours} />
 
             {weekDates.map((dateObj) => {
