@@ -19,7 +19,7 @@ type TaskCardProps = {
     onEdit(task: Task): void;
     onDelete(task: Task): void;
     onMove: (task: Task) => void;
-    getDayFromClientX: (clientX: number) => string | null;
+    getDateFromClientX: (clientX: number) => string | null;
     minTop: number;
     maxTop: number;
 };
@@ -32,7 +32,7 @@ export default function TaskCard({
     onEdit,
     onDelete,
     onMove,
-    getDayFromClientX,
+    getDateFromClientX,
     minTop,
     maxTop,
 }: TaskCardProps) {
@@ -102,11 +102,11 @@ export default function TaskCard({
                 const duration = getDurationInMinutes(task.startTime, task.endTime);
                 const newEnd = minutesToTime(timeToMinutes(newStart) + duration);
 
-                const newDay = getDayFromClientX(e.clientX) ?? task.day;
+                const newDate = getDateFromClientX(e.clientX) ?? task.date;
 
                 onMove({
                     ...task,
-                    day: newDay,
+                    date: newDate,
                     startTime: newStart,
                     endTime: newEnd,
                     updatedAt: new Date(),

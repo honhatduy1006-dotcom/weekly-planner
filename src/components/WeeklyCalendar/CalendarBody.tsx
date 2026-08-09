@@ -2,9 +2,10 @@ import TimeColumn from "./TimeColumn";
 import DayColumn from "./DayColumn";
 import type { Task } from "../../types/task";
 import { useRef } from "react";
+import { toISODate } from "../../utils/date";
 
 type CalendarBodyProps = {
-    days: string[];
+    weekDates: Date[];
     hours: string[];
     tasks: Task[];
     onEdit: (task: Task) => void;
@@ -14,7 +15,7 @@ type CalendarBodyProps = {
 };
 
 export default function CalendarBody({
-    days,
+    weekDates,
     hours,
     tasks,
     onEdit,
@@ -23,47 +24,36 @@ export default function CalendarBody({
     onCreateTask,
 }: CalendarBodyProps) {
 
-    const columnRects = useRef<Map<string, DOMRect>>(
-        new Map()
-    );
+    const columnRects = useRef<Map<string, DOMRect>>(new Map());
 
-    const registerColumn = (
-        day: string,
-        rect: DOMRect
-    ) => { columnRects.current.set(day, rect); };
+    const registerColumn = (day: string, rect: DOMRect) => {
+         columnRects.current.set(day, rect); 
+    };
 
-    const getDayFromClientX = (
-    clientX: number
-    ): string | null => {
-
+    const getDayFromClientX = (clientX: number): string | null => {
         for (const [day, rect] of columnRects.current) {
-
             if (
                 clientX >= rect.left &&
                 clientX <= rect.right
             ) {
                 return day;
             }
-
         }
-
         return null;
-
     };
 
     return (
         <div 
-            className="
-                grid
-                grid-cols-[90px_repeat(7,minmax(0,1fr))]
-            "
-        >
+            className="gridgrid-cols-[90px_repeat(7,minmax(0,1fr))]">
             <TimeColumn hours={hours} />
 
-            {days.map((day) => (
+            {weekDates.map((dateObj) => {
+                const isoDate = toISODate(dateObj);
+
+            return (
                 <DayColumn
-                    key={day}
-                    day={day}
+                    key={isoDate}
+                    date={isoDate}
                     hours={hours}
                     tasks={tasks}
                     onEdit={onEdit}
@@ -73,7 +63,8 @@ export default function CalendarBody({
                     registerColumn={registerColumn}
                     getDayFromClientX={getDayFromClientX}
                 />
-            ))}
+                );
+            })}
         </div>
     );
 }

@@ -10,7 +10,7 @@ import {
 import { useLayoutEffect, useRef, useState } from "react";
 
 type DayColumnProps = {
-    day: string;
+    date: string;
     hours: string[];
     tasks: Task[];
     onEdit: (task: Task) => void;
@@ -24,7 +24,7 @@ type DayColumnProps = {
 const DEFAULT_CREATE_DURATION_MINUTES = 60; 
 
 export default function DayColumn({
-    day,
+    date,
     hours,
     tasks,
     onEdit,
@@ -38,22 +38,20 @@ export default function DayColumn({
 
     const dayTasks =
         tasks.filter(
-            task => task.day === day
+            task => task.date === date
         );
 
     const columnRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
-
             if (!columnRef.current) return;
-
             registerColumn(
-                day,
+                date,
                 columnRef.current.getBoundingClientRect()
             );
 
-        }, [day]);
+        }, [date]);
 
     const minTop = 0;
     const maxTop = hours.length * HOUR_HEIGHT;
@@ -121,7 +119,7 @@ export default function DayColumn({
             const startTime = topToTime(finalTop1);
             const endTime = topToTime(finalTop2);
 
-            onCreateTask(day, startTime, endTime);
+            onCreateTask(date, startTime, endTime);
 
             setCreating(false);
         };
@@ -133,7 +131,7 @@ export default function DayColumn({
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [creating, createEnd, day]);
+    }, [creating, createEnd, date]);
 
     const previewTop = Math.min(createStart, createEnd);
     const previewHeight = Math.abs(createEnd - createStart);
@@ -202,7 +200,7 @@ export default function DayColumn({
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onMove={onMove}
-                        getDayFromClientX={getDayFromClientX}
+                        getDateFromClientX={getDayFromClientX}
                         minTop={minTop}
                         maxTop={maxTop}
                     />

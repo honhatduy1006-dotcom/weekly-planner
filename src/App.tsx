@@ -12,21 +12,15 @@ import { getMonday, addWeeks, getWeekDates } from "./utils/date";
 
 function App() {
     const [tasks, setTasks] = useState<Task[]>(mockTasks);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-
     const [pendingTask, setPendingTask] = useState<Task | null>(null);
-
     const [conflicts, setConflicts] = useState<Task[]>([]);
-
     const [isConflictOpen, setIsConflictOpen] = useState(false);
 
     const [createDraft, setCreateDraft] = useState<{
-        day: string;
+        date: string;
         startTime: string;
         endTime: string;
     } | null>(null);
@@ -60,26 +54,18 @@ function App() {
         });
 
         setSelectedTask(null);
-
         setCreateDraft(null);
-
         setIsModalOpen(false);
-
     };
 
     const handleSaveTask = (task: Task) => {
 
-        const overlapTasks =
-            getOverlappingTasks(tasks, task);
+        const overlapTasks = getOverlappingTasks(tasks, task);
 
         if (overlapTasks.length > 0) {
-
             setPendingTask(task);
-
             setConflicts(overlapTasks);
-
             setIsConflictOpen(true);
-
             return;
         }
 
@@ -179,10 +165,14 @@ function App() {
 
             <WeeklyCalendar 
                 tasks={tasks}
+                weekDates={weekDates}
                 onEdit={handleEditTask}
                 onDelete={handleRequestDelete}
                 onMove={handleSaveTask}
                 onCreateTask={handleCreateTask}
+                onPrevWeek={goToPrevWeek}
+                onNextWeek={goToNextWeek}
+                onToday={goToToday}
             />
 
             <AddTaskModal
@@ -195,6 +185,7 @@ function App() {
                 onSave={handleSaveTask}
                 task={selectedTask}
                 initialDraft={createDraft}
+                weekDates={weekDates}
             />
 
             <DeleteTaskModal
