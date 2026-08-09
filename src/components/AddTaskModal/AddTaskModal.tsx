@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DAYS, HOURS } from "../../data/calendar";
+import { DAYS } from "../../data/calendar";
 import type { Task } from "../../types/task";
 import {
     isValidTimeRange,
@@ -8,6 +8,7 @@ import {
     splitTime,
     joinTime,
 } from "../../utils/time";
+import { toISODate, fromISODate, getWeekdayKey } from "../../utils/date";
 
 const HOUR_OPTIONS = generateHourOptions();
 
@@ -16,7 +17,8 @@ type AddTaskModalProps = {
     onClose: () => void;
     onSave: (task: Task) => void;
     task?: Task | null;
-    initialDraft?: { day: string; startTime: string; endTime: string } | null;
+    initialDraft?: { date: string; startTime: string; endTime: string } | null;
+    weekDates: Date[];
 };
 
 export default function AddTaskModal({
@@ -25,6 +27,7 @@ export default function AddTaskModal({
     onSave,
     task,
     initialDraft,
+    weekDates,
 }: AddTaskModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -50,7 +53,7 @@ export default function AddTaskModal({
 
             setTitle(task.title);
             setDescription(task.description ?? "");
-            setDay(task.day);
+            setDay(getWeekdayKey(fromISODate(task.date)));
 
             const start = splitTime(task.startTime);
             setStartHour(start.hour);
@@ -67,7 +70,7 @@ export default function AddTaskModal({
             // Tạo task mới từ kéo-thả trên lịch
             setTitle("");
             setDescription("");
-            setDay(initialDraft.day);
+            setDay(getWeekdayKey(fromISODate(initialDraft.date)));
 
             const start = splitTime(initialDraft.startTime);
             setStartHour(start.hour);
@@ -122,11 +125,14 @@ export default function AddTaskModal({
             return;
         }
 
+        const dayIndex = DAYS.indexOf(day);
+        const date = toISODate(weekDates[dayIndex]);
+
         const newTask: Task = {
             id: task?.id ?? crypto.randomUUID(),
             title,
             description,
-            day,
+            date,
             startTime,
             endTime,
             color,
