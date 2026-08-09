@@ -8,6 +8,7 @@ import { tasks as mockTasks } from "./data/tasks";
 import type { Task } from "./types/task";
 import { getOverlappingTasks } from "./utils/task";
 import ConflictTaskModal from "./components/ConflictTaskModal/ConflictTaskModal";
+import { getMonday, addWeeks, getWeekDates } from "./utils/date";
 
 function App() {
     const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -29,6 +30,13 @@ function App() {
         startTime: string;
         endTime: string;
     } | null>(null);
+
+    const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getMonday(new Date()));
+    const weekDates = getWeekDates(currentWeekStart);
+
+    const goToPrevWeek = () => setCurrentWeekStart(prev => addWeeks(prev, -1));
+    const goToNextWeek = () => setCurrentWeekStart(prev => addWeeks(prev, 1));
+    const goToToday = () => setCurrentWeekStart(getMonday(new Date()));
 
     const saveTask = (task: Task) => {
 
