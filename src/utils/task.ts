@@ -10,7 +10,7 @@ export function isTaskOverlap(
 ): boolean {
 
     // Khác ngày thì chắc chắn không trùng
-    if (taskA.day !== taskB.day) {
+    if (taskA.date !== taskB.date) {
         return false;
     }
 

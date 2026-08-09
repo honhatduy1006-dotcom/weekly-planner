@@ -1,5 +1,7 @@
 import type { Task } from "../types/task";
+import { getMonday, addDays, toISODate } from "../utils/date";
 
+const monday = getMonday(new Date());
 export const tasks: Task[] = [
     {
         id: "1",
@@ -7,7 +9,7 @@ export const tasks: Task[] = [
 
         description: "Learn Components",
 
-        day: "Mon",
+        date: toISODate(addDays(monday, 0)),
 
         startTime: "08:00",
 
@@ -27,7 +29,7 @@ export const tasks: Task[] = [
 
         title: "Gym",
 
-        day: "Tue",
+        date: toISODate(addDays(monday, 1)),
 
         startTime: "18:00",
 

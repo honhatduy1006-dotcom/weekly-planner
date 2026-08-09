@@ -5,7 +5,7 @@ export interface Task {
 
     description?: string;
 
-    day: string;
+    date: string;
 
     startTime: string;
 
