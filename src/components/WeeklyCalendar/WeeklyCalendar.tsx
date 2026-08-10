@@ -10,7 +10,7 @@ type WeeklyCalendarProps = {
     onEdit(task: Task): void;
     onDelete(task: Task): void;
     onMove: (task: Task) => void;
-    onCreateTask: (day: string, startTime: string, endTime: string) => void;
+    onCreateTask: (date: string, startTime: string, endTime: string) => void;
     onPrevWeek: () => void;
     onNextWeek: () => void;
     onToday: () => void;

@@ -18,7 +18,7 @@ type DayColumnProps = {
     onDelete: (task: Task) => void;
     onCreateTask: (day: string, startTime: string, endTime: string) => void;
     registerColumn: (day: string, rect: DOMRect) => void;
-    getDayFromClientX: (clientX: number) => string | null;
+    getDateFromClientX: (clientX: number) => string | null;
 };
 
 const DEFAULT_CREATE_DURATION_MINUTES = 60; 
@@ -32,7 +32,7 @@ export default function DayColumn({
     onMove,
     onCreateTask,
     registerColumn,
-    getDayFromClientX,
+    getDateFromClientX,
     
 }: DayColumnProps) {
 
@@ -200,7 +200,7 @@ export default function DayColumn({
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onMove={onMove}
-                        getDateFromClientX={getDayFromClientX}
+                        getDateFromClientX={getDateFromClientX}
                         minTop={minTop}
                         maxTop={maxTop}
                     />

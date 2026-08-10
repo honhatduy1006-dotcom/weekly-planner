@@ -140,14 +140,14 @@ function App() {
     };
 
     const handleCreateTask = (
-        day: string,
+        date: string,
         startTime: string,
         endTime: string
     ) => {
 
         setSelectedTask(null);
 
-        setCreateDraft({ day, startTime, endTime });
+        setCreateDraft({ date, startTime, endTime });
 
         setIsModalOpen(true);
 

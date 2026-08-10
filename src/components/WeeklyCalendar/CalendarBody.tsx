@@ -26,11 +26,11 @@ export default function CalendarBody({
 
     const columnRects = useRef<Map<string, DOMRect>>(new Map());
 
-    const registerColumn = (day: string, rect: DOMRect) => {
-         columnRects.current.set(day, rect); 
+    const registerColumn = (date: string, rect: DOMRect) => {
+         columnRects.current.set(date, rect); 
     };
 
-    const getDayFromClientX = (clientX: number): string | null => {
+    const getDateFromClientX = (clientX: number): string | null => {
         for (const [day, rect] of columnRects.current) {
             if (
                 clientX >= rect.left &&
@@ -61,7 +61,7 @@ export default function CalendarBody({
                     onMove={onMove}
                     onCreateTask={onCreateTask} 
                     registerColumn={registerColumn}
-                    getDayFromClientX={getDayFromClientX}
+                    getDateFromClientX={getDateFromClientX}
                 />
                 );
             })}

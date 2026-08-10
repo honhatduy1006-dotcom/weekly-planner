@@ -20,10 +20,7 @@ export function isTaskOverlap(
     const startB = timeToMinutes(taskB.startTime);
     const endB = timeToMinutes(taskB.endTime);
 
-    return (
-        startA < endB &&
-        endA > startB
-    );
+    return startA < endB && endA > startB;
 }
 
 /**
