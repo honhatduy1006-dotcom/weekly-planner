@@ -62,7 +62,7 @@ export default function DeleteTaskModal({
                                 Ngày
                             </span>
 
-                            <span>{task.day}</span>
+                            <span>{task.date}</span>
                         </div>
 
                         <div className="flex justify-between">

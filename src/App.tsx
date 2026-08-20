@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import Navbar from "./components/Navbar/Navbar";
+import MiniMonthSidebar from "./components/Navbar/MiniMonthSidebar";
 import WeeklyCalendar from "./components/WeeklyCalendar/WeeklyCalendar";
 import AddTaskModal from "./components/AddTaskModal/AddTaskModal";
 import DeleteTaskModal from "./components/DeleteTaskModal/DeleteTaskModal";
@@ -18,6 +19,7 @@ function App() {
     const [pendingTask, setPendingTask] = useState<Task | null>(null);
     const [conflicts, setConflicts] = useState<Task[]>([]);
     const [isConflictOpen, setIsConflictOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const [createDraft, setCreateDraft] = useState<{
         date: string;
@@ -31,6 +33,8 @@ function App() {
     const goToPrevWeek = () => setCurrentWeekStart(prev => addWeeks(prev, -1));
     const goToNextWeek = () => setCurrentWeekStart(prev => addWeeks(prev, 1));
     const goToToday = () => setCurrentWeekStart(getMonday(new Date()));
+    const goToDate = (date: Date) => setCurrentWeekStart(getMonday(date));
+    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
     const saveTask = (task: Task) => {
 
@@ -161,19 +165,29 @@ function App() {
                     setCreateDraft(null);
                     setIsModalOpen(true);
                 }}
+                onToggleSidebar={toggleSidebar}
             />
 
-            <WeeklyCalendar 
-                tasks={tasks}
-                weekDates={weekDates}
-                onEdit={handleEditTask}
-                onDelete={handleRequestDelete}
-                onMove={handleSaveTask}
-                onCreateTask={handleCreateTask}
-                onPrevWeek={goToPrevWeek}
-                onNextWeek={goToNextWeek}
-                onToday={goToToday}
-            />
+            <div className="flex">
+                <MiniMonthSidebar
+                    isOpen={isSidebarOpen}
+                    weekDates={weekDates}
+                    onSelectDate={goToDate}
+                />
+                <div className="min-w-0 flex-1">
+                    <WeeklyCalendar 
+                        tasks={tasks}
+                        weekDates={weekDates}
+                        onEdit={handleEditTask}
+                        onDelete={handleRequestDelete}
+                        onMove={handleSaveTask}
+                        onCreateTask={handleCreateTask}
+                        onPrevWeek={goToPrevWeek}
+                        onNextWeek={goToNextWeek}
+                        onToday={goToToday}
+                    />
+                </div>
+            </div>
 
             <AddTaskModal
                 isOpen={isModalOpen}
