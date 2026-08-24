@@ -4,13 +4,19 @@ import MiniMonthSidebar from "../components/Navbar/MiniMonthSidebar";
 import WeeklyCalendar from "../components/WeeklyCalendar/WeeklyCalendar";
 import AddTaskModal from "../components/AddTaskModal/AddTaskModal";
 import DeleteTaskModal from "../components/DeleteTaskModal/DeleteTaskModal";
+import RequireAuthModal from "../components/RequireAuthModal";
 import { tasks as mockTasks } from "../data/tasks";
 import type { Task } from "../types/task";
 import { getOverlappingTasks } from "../utils/task";
 import ConflictTaskModal from "../components/ConflictTaskModal/ConflictTaskModal";
 import { getMonday, addWeeks, getWeekDates } from "../utils/date";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function CalendarPage() {
+
+    const { user } = useAuth();
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
     const [tasks, setTasks] = useState<Task[]>(mockTasks);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -34,6 +40,14 @@ export default function CalendarPage() {
     const goToToday = () => setCurrentWeekStart(getMonday(new Date()));
     const goToDate = (date: Date) => setCurrentWeekStart(getMonday(date));
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+    const requireAuth = (action: () => void) => {
+        if (!user) {
+            setIsAuthModalOpen(true);
+            return;
+        }
+        action();
+    };
 
     const saveTask = (task: Task) => {
 
@@ -157,11 +171,13 @@ export default function CalendarPage() {
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar
-                onAddTask={() => {
-                    setSelectedTask(null);
-                    setCreateDraft(null);
-                    setIsModalOpen(true);
-                }}
+                onAddTask={() =>
+                    requireAuth(() => {
+                        setSelectedTask(null);
+                        setCreateDraft(null);
+                        setIsModalOpen(true);
+                    })
+                }
                 onToggleSidebar={toggleSidebar}
             />
 
@@ -213,6 +229,11 @@ export default function CalendarPage() {
                 onAddAnyway={handleAddAnyway}
                 onEdit={handleEditConflict}
                 onCancel={handleCancelConflict}
+            />
+
+            <RequireAuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
             />
         </div>
     );
