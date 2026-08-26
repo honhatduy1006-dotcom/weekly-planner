@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import MiniMonthSidebar from "../components/Navbar/MiniMonthSidebar";
 import WeeklyCalendar from "../components/WeeklyCalendar/WeeklyCalendar";
 import AddTaskModal from "../components/AddTaskModal/AddTaskModal";
 import DeleteTaskModal from "../components/DeleteTaskModal/DeleteTaskModal";
 import RequireAuthModal from "../components/RequireAuthModal";
-import { tasks as mockTasks } from "../data/tasks";
 import type { Task } from "../types/task";
 import { getOverlappingTasks } from "../utils/task";
 import ConflictTaskModal from "../components/ConflictTaskModal/ConflictTaskModal";
-import { getMonday, addWeeks, getWeekDates } from "../utils/date";
+import { getMonday, addWeeks, getWeekDates, toISODate} from "../utils/date";
 import { useAuth } from "../contexts/AuthContext";
+import * as taskService from "../services/taskService";
 
 export default function CalendarPage() {
 
     const { user } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-    const [tasks, setTasks] = useState<Task[]>(mockTasks);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
@@ -41,6 +42,29 @@ export default function CalendarPage() {
     const goToDate = (date: Date) => setCurrentWeekStart(getMonday(date));
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
+    const loadTasks = useCallback(async () => {
+        if (!user) {
+            setTasks([]);
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const from = toISODate(weekDates[0]);
+            const to = toISODate(weekDates[weekDates.length - 1]);
+            const data = await taskService.fetchTasks(from, to);
+            setTasks(data);
+        } catch (err) {
+            console.error('Không tải được danh sách task', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user, weekDates]);
+
+    useEffect(() => {
+        loadTasks();
+    }, [loadTasks]);
+
     const requireAuth = (action: () => void) => {
         if (!user) {
             setIsAuthModalOpen(true);
@@ -49,26 +73,41 @@ export default function CalendarPage() {
         action();
     };
 
-    const saveTask = (task: Task) => {
+    const saveTask = async (task: Task) => {
 
-        setTasks(prev => {
+        try {
+        if (selectedTask) {
+            // UPDATE
+            const updated = await taskService.updateTask(task.id, {
+                title: task.title,
+                description: task.description,
+                date: task.date,
+                startTime: task.startTime,
+                endTime: task.endTime,
+                color: task.color,
+                completed: task.completed,
+            });
 
-            const exists =
-                prev.some(t => t.id === task.id);
+            setTasks(prev =>
+                prev.map(t => t.id === updated.id ? updated : t)
+            );
+        } else {
+            // CREATE
+            const created = await taskService.createTask({
+                title: task.title,
+                description: task.description,
+                date: task.date,
+                startTime: task.startTime,
+                endTime: task.endTime,
+                color: task.color,
+                completed: task.completed,
+            });
 
-            if (exists) {
-
-                return prev.map(t =>
-                    t.id === task.id
-                        ? task
-                        : t
-                );
-
-            }
-
-            return [...prev, task];
-
-        });
+            setTasks(prev => [...prev, created]);
+        }
+    } catch (err) {
+        console.error("Không lưu được task", err);
+    }
 
         setSelectedTask(null);
         setCreateDraft(null);
@@ -90,18 +129,12 @@ export default function CalendarPage() {
 
     };
 
-    const handleAddAnyway = () => {
+    const handleAddAnyway = async () => {
 
         if (!pendingTask) return;
 
-        setTasks(prev => {
-
-            const remain = prev.filter(
-                t => !conflicts.some(c => c.id === t.id)
-            );
-
-            return [...remain, pendingTask];
-        });
+        await Promise.all(conflicts.map(c => taskService.deleteTask(c.id)));
+        await saveTask(pendingTask);
 
         setPendingTask(null);
         setConflicts([]);
@@ -112,46 +145,42 @@ export default function CalendarPage() {
     };
 
     const handleEditConflict = () => {
-
         setIsConflictOpen(false);
-
         setPendingTask(null);
-
         setConflicts([]);
 
     };
 
     const handleCancelConflict = () => {
-
         setPendingTask(null);
-
         setConflicts([]);
-
         setIsConflictOpen(false);
 
     };
 
     const handleRequestDelete = (task: Task) => {
-        setTaskToDelete(task);
+        requireAuth(() => setTaskToDelete(task));
     };
 
-    const handleConfirmDelete = () => {
-
+    const handleConfirmDelete = async () => {
         if (!taskToDelete) return;
 
-        setTasks(prev =>
-            prev.filter(task => task.id !== taskToDelete.id)
-        );
-
+        try {
+            await taskService.deleteTask(taskToDelete.id);
+            setTasks(prev => prev.filter(task => task.id !== taskToDelete.id));
+        } catch (err) {
+            console.error('Không xóa được task', err);
+        }
+        
         setTaskToDelete(null);
     };
 
     const handleEditTask = (task: Task) => {
+        requireAuth(() => {
+            setSelectedTask(task);
 
-        setSelectedTask(task);
-
-        setIsModalOpen(true);
-
+            setIsModalOpen(true);
+        });
     };
 
     const handleCreateTask = (
@@ -159,13 +188,11 @@ export default function CalendarPage() {
         startTime: string,
         endTime: string
     ) => {
-
-        setSelectedTask(null);
-
-        setCreateDraft({ date, startTime, endTime });
-
-        setIsModalOpen(true);
-
+        requireAuth(() => {
+            setSelectedTask(null);
+            setCreateDraft({ date, startTime, endTime });
+            setIsModalOpen(true);
+        });
     };
 
     return (

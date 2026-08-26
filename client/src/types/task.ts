@@ -15,7 +15,18 @@ export interface Task {
 
     color: string;
 
-    createdAt: Date;
-    updatedAt: Date;
-
+    createdAt: string;
+    updatedAt: string;
 }
+
+export interface CreateTaskPayload {
+    title: string;
+    description?: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    color: string;
+    completed?: boolean;
+}
+
+export type UpdateTaskPayload = Partial<CreateTaskPayload>;

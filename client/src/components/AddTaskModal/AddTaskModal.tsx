@@ -137,8 +137,8 @@ export default function AddTaskModal({
             endTime,
             color,
             completed,
-            createdAt: task?.createdAt ?? new Date(),
-            updatedAt: new Date(),
+            createdAt: task?.createdAt ?? new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         };
 
         onSave(newTask);

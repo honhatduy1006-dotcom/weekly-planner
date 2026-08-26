@@ -109,7 +109,7 @@ export default function TaskCard({
                     date: newDate,
                     startTime: newStart,
                     endTime: newEnd,
-                    updatedAt: new Date(),
+                    updatedAt: new Date().toISOString(),
                 });
             }
 
@@ -187,7 +187,7 @@ export default function TaskCard({
                         ...task,
                         startTime: newStart,
                         endTime: task.endTime,
-                        updatedAt: new Date(),
+                        updatedAt: new Date().toISOString(),
                     });
                 } else {
                     const baseBottom = resizeBaseTopRef.current + resizeBaseHeightRef.current;
@@ -204,7 +204,7 @@ export default function TaskCard({
                         ...task,
                         startTime: task.startTime,
                         endTime: newEnd,
-                        updatedAt: new Date(),
+                        updatedAt: new Date().toISOString()
                     });
                 }
             } else {

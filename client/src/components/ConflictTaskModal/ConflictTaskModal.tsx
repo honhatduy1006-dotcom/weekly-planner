@@ -47,7 +47,7 @@ export default function ConflictTaskModal({
                         </p>
 
                         <p>
-                            {newTask.day}
+                            {newTask.date}
                         </p>
 
                         <p>
@@ -78,7 +78,7 @@ export default function ConflictTaskModal({
                                 </p>
 
                                 <p>
-                                    {task.day}
+                                    {task.date}
                                 </p>
 
                                 <p>
