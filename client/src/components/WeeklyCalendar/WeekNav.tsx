@@ -11,12 +11,16 @@ export default function WeekNav({ weekDates, onPrevWeek, onNextWeek, onToday }: 
     const today = new Date();
 
     return (
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+            <h2 className="order-1 text-lg font-semibold text-gray-800 sm:order-2 sm:text-xl">
+                {formatMonthYearRange(weekDates)}
+            </h2>
+
+            <div className="order-2 flex items-center gap-2 sm:order-1">
                 <button
                     onClick={onPrevWeek}
                     aria-label="Tuần trước"
-                    className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 transition text-lg"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-gray-600 transition hover:bg-gray-100"
                 >
                     ‹
                 </button>
@@ -24,22 +28,18 @@ export default function WeekNav({ weekDates, onPrevWeek, onNextWeek, onToday }: 
                 <button
                     onClick={onNextWeek}
                     aria-label="Tuần sau"
-                    className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 transition text-lg"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-gray-600 transition hover:bg-gray-100"
                 >
                     ›
                 </button>
 
                 <button
                     onClick={onToday}
-                    className="ml-2 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                    className="ml-1 whitespace-nowrap rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-100 sm:ml-2 sm:px-4 sm:text-sm"
                 >
                     Hôm nay: {formatFullDate(today)}
                 </button>
             </div>
-
-            <h2 className="text-xl font-semibold text-gray-800">
-                {formatMonthYearRange(weekDates)}
-            </h2>
         </div>
     );
 }

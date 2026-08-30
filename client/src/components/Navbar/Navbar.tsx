@@ -14,7 +14,7 @@ export default function Navbar({
     return (
 
         <header className="bg-white border-b shadow-sm">
-            <div className="flex w-full items-center justify-between px-6 py-5">
+            <div className="flex w-full flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
                 <div className="flex items-center gap-3 min-w-0">
                     <button
                         onClick={onToggleSidebar}
@@ -28,18 +28,18 @@ export default function Navbar({
                         </svg>
                     </button>
 
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">
+                    <div className="min-w-0">
+                        <h1 className="truncate text-xl font-bold text-gray-800 sm:text-3xl">
                             Weekly Planner
                         </h1>
 
-                        <p className="text-sm text-gray-500">
+                        <p className="hidden text-sm text-gray-500 sm:block">
                             Giúp bạn lập lịch làm việc hiệu quả hơn, hoặc không:)
                         </p>
                     </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3">
+                <div className="flex shrink-0 items-center justify-end gap-3">
                     {user ? (
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
