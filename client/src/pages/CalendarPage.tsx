@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import MiniMonthSidebar from "../components/Navbar/MiniMonthSidebar";
 import WeeklyCalendar from "../components/WeeklyCalendar/WeeklyCalendar";
@@ -34,7 +34,10 @@ export default function CalendarPage() {
     } | null>(null);
 
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getMonday(new Date()));
-    const weekDates = getWeekDates(currentWeekStart);
+    const weekDates = useMemo(
+        () => getWeekDates(currentWeekStart),
+        [currentWeekStart]
+    );;
 
     const goToPrevWeek = () => setCurrentWeekStart(prev => addWeeks(prev, -1));
     const goToNextWeek = () => setCurrentWeekStart(prev => addWeeks(prev, 1));
@@ -74,10 +77,13 @@ export default function CalendarPage() {
     };
 
     const saveTask = async (task: Task) => {
+    const isExisting = tasks.some(t => t.id === task.id);
+
+    if (isExisting) {
+        const previousTasks = tasks;
+        setTasks(prev => prev.map(t => (t.id === task.id ? task : t)));
 
         try {
-        if (selectedTask) {
-            // UPDATE
             const updated = await taskService.updateTask(task.id, {
                 title: task.title,
                 description: task.description,
@@ -88,11 +94,14 @@ export default function CalendarPage() {
                 completed: task.completed,
             });
 
-            setTasks(prev =>
-                prev.map(t => t.id === updated.id ? updated : t)
-            );
-        } else {
-            // CREATE
+            setTasks(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+        } catch (err) {
+            console.error("Không lưu được task", err);
+
+            setTasks(previousTasks);
+        }
+    } else {
+        try {
             const created = await taskService.createTask({
                 title: task.title,
                 description: task.description,
@@ -104,15 +113,15 @@ export default function CalendarPage() {
             });
 
             setTasks(prev => [...prev, created]);
+        } catch (err) {
+            console.error("Không lưu được task", err);
         }
-    } catch (err) {
-        console.error("Không lưu được task", err);
     }
 
-        setSelectedTask(null);
-        setCreateDraft(null);
-        setIsModalOpen(false);
-    };
+    setSelectedTask(null);
+    setCreateDraft(null);
+    setIsModalOpen(false);
+};
 
     const handleSaveTask = (task: Task) => {
 

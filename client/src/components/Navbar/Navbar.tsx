@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
 type NavbarProps = {
     onAddTask: () => void;
     onToggleSidebar: () => void;
@@ -7,7 +10,9 @@ export default function Navbar({
     onAddTask,
     onToggleSidebar,
 }: NavbarProps) {
+    const { user, logout } = useAuth();
     return (
+
         <header className="bg-white border-b shadow-sm">
             <div className="flex w-full items-center justify-between px-6 py-5">
                 <div className="flex items-center gap-3 min-w-0">
@@ -34,12 +39,40 @@ export default function Navbar({
                     </div>
                 </div>
 
-                <button
-                    onClick={onAddTask}
-                    className="shrink-0 whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-white"
-                >
-                    + Thêm Task
-                </button>
+                <div className="flex shrink-0 items-center gap-3">
+                    {user ? (
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                                    {(user.name || user.email).charAt(0).toUpperCase()}
+                                </div>
+                                <span className="hidden text-sm font-medium text-gray-700 sm:inline">
+                                    {user.name || user.email}
+                                </span>
+                            </div>
+                            <button
+                                onClick={logout}
+                                className="whitespace-nowrap rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            >
+                                Đăng xuất
+                            </button>
+                        </div>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="whitespace-nowrap rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            >
+                                Đăng nhập
+                            </Link>
+                        )}
+
+                    <button
+                        onClick={onAddTask}
+                        className="shrink-0 whitespace-nowrap rounded-lg bg-blue-600 px-4 py-2 text-white"
+                    >
+                        + Thêm Task
+                    </button>
+                </div>
             </div>
         </header>
     );
