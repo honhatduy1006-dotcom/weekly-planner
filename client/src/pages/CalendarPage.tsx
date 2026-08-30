@@ -224,6 +224,11 @@ export default function CalendarPage() {
                     onSelectDate={goToDate}
                 />
                 <div className="min-w-0 flex-1">
+                    {isLoading && (
+                        <div className="px-6 py-2 text-sm text-gray-400">
+                            Đang tải task...
+                        </div>
+                    )}
                     <WeeklyCalendar 
                         tasks={tasks}
                         weekDates={weekDates}

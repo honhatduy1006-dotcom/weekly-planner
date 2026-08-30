@@ -19,9 +19,9 @@ export const tasks: Task[] = [
 
         color: "bg-blue-400",
 
-        createdAt: new Date(),
+        createdAt: '2026-08-20T00:00:00.000Z',
 
-        updatedAt: new Date(),
+        updatedAt: '2026-08-20T00:00:00.000Z',
     },
 
     {
@@ -39,8 +39,8 @@ export const tasks: Task[] = [
 
         color: "bg-green-400",
 
-        createdAt: new Date(),
+        createdAt: '2026-08-20T00:00:00.000Z',
 
-        updatedAt: new Date(),
+        updatedAt: '2026-08-20T00:00:00.000Z',
     },
 ];

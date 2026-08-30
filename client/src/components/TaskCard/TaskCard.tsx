@@ -96,7 +96,6 @@ export default function TaskCard({
             if (didDragRef.current) {
                 const rawTop = top + offsetYRef.current;
                 const snappedTop = snapToInterval(rawTop);
-                const clampedSnappedTop = Math.max(minTop, Math.min(snappedTop, maxTop - taskHeight));
 
                 const newStart = topToTime(snappedTop);
                 const duration = getDurationInMinutes(task.startTime, task.endTime);
@@ -190,7 +189,6 @@ export default function TaskCard({
                         updatedAt: new Date().toISOString(),
                     });
                 } else {
-                    const baseBottom = resizeBaseTopRef.current + resizeBaseHeightRef.current;
                     const previewBottom = previewTop + previewHeight;
                     const snappedBottom = snapToInterval(previewBottom);
                     const clampedBottom = Math.min(
