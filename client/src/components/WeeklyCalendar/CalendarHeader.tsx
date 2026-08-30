@@ -9,7 +9,7 @@ export default function CalendarHeader({ weekDates }: CalendarHeaderProps) {
         <div
             className="
                 grid
-                grid-cols-[90px_repeat(7,minmax(0,1fr))]
+                grid-cols-[90px_repeat(7,minmax(95px,1fr))]
                 bg-gray-50
             "
         >

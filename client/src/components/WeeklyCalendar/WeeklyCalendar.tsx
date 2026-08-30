@@ -29,26 +29,29 @@ export default function WeeklyCalendar({
     
 }: WeeklyCalendarProps) {
     return (
-        <div className="mx-auto mt-8 w-[95%] max-w-7xl rounded-xl bg-white shadow-md overflow-hidden">
+        <div className="mx-auto mt-8 w-[95%] max-w-7xl rounded-xl bg-white shadow-md">
             <WeekNav
                 weekDates={weekDates}
                 onPrevWeek={onPrevWeek}
                 onNextWeek={onNextWeek}
                 onToday={onToday}
             />
-            
-            <CalendarHeader weekDates={weekDates} />
 
-            <CalendarBody
-                weekDates={weekDates}
-                hours={HOURS}
-                tasks={tasks}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onMove={onMove}
-                onCreateTask={onCreateTask}
+            <div className="overflow-x-auto">
+                <div className="min-w-[760px]">
+                    <CalendarHeader weekDates={weekDates} />
 
-            />
+                    <CalendarBody
+                        weekDates={weekDates}
+                        hours={HOURS}
+                        tasks={tasks}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onMove={onMove}
+                        onCreateTask={onCreateTask}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
