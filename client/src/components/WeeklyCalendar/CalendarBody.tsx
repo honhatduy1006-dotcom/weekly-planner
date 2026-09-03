@@ -42,9 +42,11 @@ export default function CalendarBody({
         return null;
     };
 
+    const gridTemplateColumns = `90px repeat(${weekDates.length}, minmax(95px, 1fr))`;
+
     return (
         <div 
-            className="grid grid-cols-[90px_repeat(7,minmax(95px,1fr))]">
+            className="grid" style={{ gridTemplateColumns }}>
             <TimeColumn hours={hours} />
 
             {weekDates.map((dateObj) => {

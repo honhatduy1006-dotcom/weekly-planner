@@ -8,9 +8,11 @@ import RequireAuthModal from "../components/RequireAuthModal";
 import type { Task } from "../types/task";
 import { getOverlappingTasks } from "../utils/task";
 import ConflictTaskModal from "../components/ConflictTaskModal/ConflictTaskModal";
-import { getMonday, addWeeks, getWeekDates, toISODate} from "../utils/date";
+import { getMonday, addWeeks, addDays, getWeekDates, toISODate} from "../utils/date";
 import { useAuth } from "../contexts/AuthContext";
 import * as taskService from "../services/taskService";
+
+type ViewMode = "week" | "day";
 
 export default function CalendarPage() {
 
@@ -34,15 +36,57 @@ export default function CalendarPage() {
     } | null>(null);
 
     const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getMonday(new Date()));
+    const [viewMode, setViewMode] = useState<ViewMode>("week");
+    const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+    
     const weekDates = useMemo(
         () => getWeekDates(currentWeekStart),
         [currentWeekStart]
-    );;
+    );
 
-    const goToPrevWeek = () => setCurrentWeekStart(prev => addWeeks(prev, -1));
-    const goToNextWeek = () => setCurrentWeekStart(prev => addWeeks(prev, 1));
-    const goToToday = () => setCurrentWeekStart(getMonday(new Date()));
-    const goToDate = (date: Date) => setCurrentWeekStart(getMonday(date));
+    const visibleDates = useMemo(
+        () => (viewMode === "day" ? [selectedDate] : weekDates),
+        [viewMode, selectedDate, weekDates]
+    );
+
+    const goToPrev = () => {
+        if (viewMode === "day") {
+            setSelectedDate(prev => addDays(prev, -1));
+        } else {
+            setCurrentWeekStart(prev => addWeeks(prev, -1));
+        }
+    };
+
+    const goToNext = () => {
+        if (viewMode === "day") {
+            setSelectedDate(prev => addDays(prev, 1));
+        } else {
+            setCurrentWeekStart(prev => addWeeks(prev, 1));
+        }
+    };
+
+    const goToToday = () => {
+        if (viewMode === "day") {
+            setSelectedDate(new Date());
+        } else {
+            setCurrentWeekStart(getMonday(new Date()));
+        }
+    };
+
+    const goToDate = (date: Date) => {
+        setCurrentWeekStart(getMonday(date));
+        setViewMode("week");
+    };
+
+    const handleSelectDay = (date: Date) => {
+        setSelectedDate(date);
+        setViewMode("day");
+    };
+
+    const handleBackToWeek = () => {
+        setViewMode("week");
+    };
+
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
     const loadTasks = useCallback(async () => {
@@ -231,13 +275,16 @@ export default function CalendarPage() {
                     )}
                     <WeeklyCalendar 
                         tasks={tasks}
-                        weekDates={weekDates}
+                        weekDates={visibleDates}
+                        viewMode={viewMode}
+                        onSelectDay={handleSelectDay}
+                        onBackToWeek={handleBackToWeek}
                         onEdit={handleEditTask}
                         onDelete={handleRequestDelete}
                         onMove={handleSaveTask}
                         onCreateTask={handleCreateTask}
-                        onPrevWeek={goToPrevWeek}
-                        onNextWeek={goToNextWeek}
+                        onPrevWeek={goToPrev}
+                        onNextWeek={goToNext}
                         onToday={goToToday}
                     />
                 </div>
