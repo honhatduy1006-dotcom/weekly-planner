@@ -44,7 +44,7 @@ export default function CalendarBody({
 
     return (
         <div 
-            className="grid grid-cols-[90px_repeat(7,minmax(95,1fr))]">
+            className="grid grid-cols-[90px_repeat(7,minmax(95px,1fr))]">
             <TimeColumn hours={hours} />
 
             {weekDates.map((dateObj) => {

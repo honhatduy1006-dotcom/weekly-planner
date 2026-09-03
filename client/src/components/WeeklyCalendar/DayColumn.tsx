@@ -63,7 +63,7 @@ export default function DayColumn({
     const createStartRef = useRef(0);
     const didCreateDragRef = useRef(false);
 
-    const handleGridMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleGridPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (!gridRef.current) return;
 
         const rect = gridRef.current.getBoundingClientRect();
@@ -81,7 +81,7 @@ export default function DayColumn({
 
         const DRAG_THRESHOLD = 5;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handlePointerMove = (e: PointerEvent) => {
             if (!gridRef.current) return;
 
             const rect = gridRef.current.getBoundingClientRect();
@@ -94,7 +94,7 @@ export default function DayColumn({
             setCreateEnd(relY);
         };
 
-        const handleMouseUp = () => {
+        const handlePointerUp = () => {
             const rawTop1 = Math.min(createStartRef.current, createEnd);
             const rawTop2 = Math.max(createStartRef.current, createEnd);
 
@@ -124,12 +124,14 @@ export default function DayColumn({
             setCreating(false);
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        window.addEventListener("pointercancel", handlePointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
+            window.removeEventListener("pointercancel", handlePointerUp);
         };
     }, [creating, createEnd, date]);
 
@@ -142,7 +144,8 @@ export default function DayColumn({
             {/* Grid Layer - vùng nhận sự kiện tạo task mới */}
             <div
                 ref={gridRef}
-                onMouseDown={handleGridMouseDown}
+                onPointerDown={handleGridPointerDown}
+                style={{ touchAction: "none" }}
             >
                 {hours.map(hour => (
                     <div

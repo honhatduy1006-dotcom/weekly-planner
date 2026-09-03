@@ -60,7 +60,7 @@ export default function TaskCard({
         setPreviewHeight(taskHeight);
     }, [top, taskHeight]);
 
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         setDragging(true);
         startYRef.current = e.clientY;
         startXRef.current = e.clientX;
@@ -72,7 +72,7 @@ export default function TaskCard({
 
         const DRAG_THRESHOLD = 5;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handlePointerMove = (e: PointerEvent) => {
             const deltaY = e.clientY - startYRef.current;
             const deltaX = e.clientX - startXRef.current;
 
@@ -92,7 +92,7 @@ export default function TaskCard({
             setOffsetX(deltaX)
         };
 
-        const handleMouseUp = (e: MouseEvent) => {
+        const handlePointerUp = (e: PointerEvent) => {
             if (didDragRef.current) {
                 const rawTop = top + offsetYRef.current;
                 const snappedTop = snapToInterval(rawTop);
@@ -118,16 +118,18 @@ export default function TaskCard({
             setDragging(false);
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        window.addEventListener("pointercancel", handlePointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
+            window.removeEventListener("pointercancel", handlePointerUp);
         };
     }, [dragging]);
 
-    const handleResizeMouseDown = (edge: ResizeEdge) => (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleResizePointerDown = (edge: ResizeEdge) => (e: React.PointerEvent<HTMLDivElement>) => {
         e.stopPropagation();
         setResizeEdge(edge);
         resizeStartYRef.current = e.clientY;
@@ -141,7 +143,7 @@ export default function TaskCard({
 
         const DRAG_THRESHOLD = 5;
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const handlePointerMove = (e: PointerEvent) => {
             const delta = e.clientY - resizeStartYRef.current;
 
             if (Math.abs(delta) > DRAG_THRESHOLD) {
@@ -171,7 +173,7 @@ export default function TaskCard({
             }
         };
 
-        const handleMouseUp = () => {
+        const handlePointerUp = () => {
             if (didDragRef.current) {
                 if (resizeEdge === "top") {
                     const snappedTop = snapToInterval(previewTop);
@@ -214,16 +216,18 @@ export default function TaskCard({
             setResizeEdge(null);
         };
 
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
+        window.addEventListener("pointercancel", handlePointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", handlePointerUp);
+            window.removeEventListener("pointercancel", handlePointerUp);
         };
     }, [resizeEdge, previewTop, previewHeight]);
 
-    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleClick = (e: React.PointerEvent<HTMLDivElement>) => {
         if (didDragRef.current) {
             e.preventDefault();
             e.stopPropagation();
@@ -242,7 +246,7 @@ export default function TaskCard({
     return (
         <div
             onClick={handleClick}
-            onMouseDown={handleMouseDown}
+            onPointerDown={handlePointerDown}
             style={{
                 top: resizeEdge ? previewTop : top,
                 height: `${resizeEdge ? previewHeight : taskHeight}px`,
@@ -278,7 +282,7 @@ export default function TaskCard({
             `}
         >
             <div
-                onMouseDown={handleResizeMouseDown("top")}
+                onPointerDown={handleResizePointerDown("top")}
                 className="
                     absolute
                     top-0
@@ -371,7 +375,7 @@ export default function TaskCard({
             </div>
 
              <div
-                onMouseDown={handleResizeMouseDown("bottom")}
+                onPointerDown={handleResizePointerDown("bottom")}
                 className="
                     absolute
                     bottom-0
